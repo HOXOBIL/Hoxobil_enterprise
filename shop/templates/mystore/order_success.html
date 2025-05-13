@@ -1,0 +1,101 @@
+{% extends "mystore/base.html" %}
+{% load static %}
+
+{% block title %}Order Successful - HOXOBIL{% endblock title %}
+
+{% block extra_head %}
+    <style>
+        /* Styles specific to order_success.html */
+        .page-content-success { /* Specific class for success page content area */
+            padding: 2rem 1rem;
+            display: flex; /* For centering the container */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1; /* Takes available space */
+        }
+        .container-success { /* Renamed to avoid conflict */
+            max-width: 700px;
+            /* margin: 2rem auto; Removed as page-content-success handles centering */
+            background: #fff;
+            padding: 2rem;
+            border-radius: 0.75rem; /* Tailwind rounded-xl */
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .container-success h1 {
+            color: #10b981; /* Tailwind green-500 */
+            font-size: 2.25rem; /* Tailwind text-4xl */
+            line-height: 2.5rem;
+            font-weight: 700; /* Tailwind font-bold */
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        .container-success p {
+            font-size: 1.125rem; /* Tailwind text-lg */
+            margin-bottom: 0.75rem; /* mb-3 */
+            color: #4b5563; /* Tailwind gray-600 */
+        }
+        .order-details {
+            margin-top: 1.5rem; /* mt-6 */
+            padding: 1rem; /* p-4 */
+            background-color:#f9fafb; /* Tailwind gray-50 */
+            border-radius: 0.5rem; /* Tailwind rounded-lg */
+            text-align: left;
+            border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+        }
+        .order-details strong {
+            color: #1f2937; /* Tailwind gray-800 */
+        }
+        .btn-shop {
+            display: inline-block;
+            margin-top: 2rem; /* mt-8 */
+            padding: 0.75rem 2rem; /* py-3 px-8 */
+            background-color: #2563eb; /* Tailwind blue-600 */
+            color: white;
+            text-decoration: none;
+            border-radius: 0.375rem; /* Tailwind rounded-md */
+            font-weight: 600; /* Tailwind font-semibold */
+            transition: background-color 0.3s;
+        }
+        .btn-shop:hover {
+            background-color: #1d4ed8; /* Tailwind blue-700 */
+        }
+
+        /* Media query adjustments from your original file, if still needed for this specific content */
+        @media (max-width: 768px) {
+            .container-success h1 {
+                font-size: 2rem; /* Slightly smaller on mobile */
+            }
+            .container-success p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+{% endblock extra_head %}
+
+{% block content %}
+<div class="page-content-success">
+    {# Global messages from base.html will display general messages like successful payment #}
+    {# The 'messages.success(request, "Your payment was successful! ...")' from views.py will appear here #}
+
+    <div class="container-success">
+        <h1>🎉 Order Confirmed!</h1>
+        <p>Thank you for your purchase, {{ order.first_name|default:"Customer" }}!</p>
+        <p>Your order has been placed successfully.</p>
+        {% if order %}
+        <div class="order-details">
+            <p><strong>Order Reference:</strong> {{ order.paystack_reference }}</p>
+            <p><strong>Order ID:</strong> #{{ order.id }}</p>
+            <p><strong>Total Amount:</strong> ₦{{ order.total_amount|floatformat:2 }}</p>
+            <p>A confirmation email has been sent to <strong>{{ order.email }}</strong>.</p>
+            <p>We'll notify you once your order has been shipped.</p>
+        </div>
+        {% endif %}
+        <a href="{% url 'product_list' %}" class="btn-shop">Continue Shopping</a>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_script %}
+    {# Add any page-specific JavaScript for order_success.html here if needed #}
+{% endblock extra_script %}

@@ -1,0 +1,236 @@
+{% extends "mystore/base.html" %}
+{% load static %}
+
+{% block title %}Checkout - HOXOBIL{% endblock title %}
+
+{% block extra_head %}
+    <style>
+        /* Styles specific to checkout.html */
+        .page-content-checkout { /* Specific class for checkout content area */
+            padding: 2rem 1rem; 
+        }
+        .checkout-container {
+            max-width: 800px; 
+            margin: 0 auto;
+            background: #fff;
+            padding: 2rem;
+            border-radius: 0.75rem; /* Tailwind rounded-xl */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            display: grid;
+            grid-template-columns: 1.5fr 1fr; 
+            gap: 2.5rem;
+        }
+        .checkout-form, .order-summary {
+            padding: 1.5rem;
+            border-radius: 0.5rem; /* Tailwind rounded-lg */
+        }
+        .checkout-form {
+             border-right: 1px solid #e5e7eb; /* Tailwind gray-200 */
+        }
+        .order-summary {
+            background-color: #f9fafb; /* Tailwind gray-50 */
+        }
+
+        .checkout-container h1, .checkout-container h2 {
+            font-size: 1.8rem; /* text-2xl */
+            margin-bottom: 1.5rem; /* mb-6 */
+            text-align: left; 
+            color: #1f2937; /* gray-800 */
+            font-weight: 600; /* font-semibold */
+        }
+         .checkout-container h2 {
+            font-size: 1.4rem; /* approx text-xl */
+            border-bottom: 1px solid #e5e7eb; /* gray-200 */
+            padding-bottom: 0.75rem; /* pb-3 */
+         }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem; /* mb-2 */
+            font-weight: 500; 
+            font-size: 0.875rem; /* text-sm */
+            color: #4b5563; /* gray-600 */
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"], 
+        textarea,
+        select { 
+            width: 100%;
+            padding: 0.75rem; /* p-3 */
+            margin-bottom: 1.2rem; 
+            border: 1px solid #d1d5db; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            font-size: 1rem;
+            line-height: 1.5;
+            background-color: #fff;
+            transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #60a5fa; /* Tailwind blue-400 */
+            outline: 0;
+            box-shadow: 0 0 0 .2rem rgba(59,130,246,.25); /* Tailwind blue-500 with opacity */
+        }
+
+        .btn-place-order {
+            display: block;
+            width: 100%;
+            padding: 0.75rem; /* p-3 */
+            background: #10b981; /* Tailwind green-500 */
+            color: #fff;
+            font-weight: 600; /* font-semibold */
+            font-size: 1.125rem; /* text-lg */
+            border: none;
+            border-radius: 0.5rem; /* rounded-lg */
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 1rem; /* mt-4 */
+        }
+        .btn-place-order:hover {
+            background: #059669; /* Tailwind green-600 */
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed #e0e0e0;
+            font-size: 0.95rem;
+        }
+        .summary-item:last-child { border-bottom: none; }
+        .summary-item .item-name { color: #1f2937; flex-basis: 70%; }
+        .summary-item .item-name .variant-title { display: block; font-size: 0.8em; color: #6b7280; }
+        .summary-item .item-price { color: #374151; font-weight: 500; }
+        
+        .summary-total {
+            display: flex; justify-content: space-between;
+            padding: 1rem 0; margin-top: 1rem;
+            font-size: 1.25rem; /* text-xl */ font-weight: 700; /* font-bold */
+            border-top: 2px solid #1f2937; /* gray-800 */
+        }
+        .summary-total .total-label { color: #111827; }
+        .summary-total .total-amount { color: #2563eb; } /* blue-600 */
+
+        @media (max-width: 768px) {
+            .checkout-container {
+                grid-template-columns: 1fr; 
+                gap: 1.5rem;
+            }
+            .checkout-form {
+                border-right: none; 
+                border-bottom: 1px solid #e5e7eb; 
+                padding-bottom: 2rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+{% endblock extra_head %}
+
+{% block content %}
+<div class="page-content-checkout"> {# Using specific class for checkout content area #}
+    {# Global messages will be displayed by base.html's messages-container-global #}
+    {# If you had specific checkout page messages, they could go here. #}
+
+    <div class="checkout-container">
+        <div class="checkout-form">
+            <h1>Shipping & Contact</h1>
+            <form action="{% url 'checkout_submit' %}" method="post" id="checkout-form-details">
+                {% csrf_token %}
+                
+                <h2>Contact Information</h2>
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+
+                <h2>Shipping Address</h2>
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" placeholder="First and Last Name" required>
+
+                <label for="address">Street Address</label>
+                <input type="text" id="address" name="address" placeholder="123 Main St, Apt 4B" required>
+
+                <label for="city">City</label>
+                <input type="text" id="city" name="city" placeholder="Lagos" required>
+                
+                <label for="state">State / Province</label>
+                <input type="text" id="state" name="state" placeholder="Lagos" required>
+
+                <label for="zipcode">ZIP / Postal Code</label>
+                <input type="text" id="zipcode" name="zipcode" placeholder="100001">
+
+                <label for="country">Country</label>
+                <select id="country" name="country" required>
+                    <option value="NG" selected>Nigeria</option>
+                    {# Add other countries as needed #}
+                </select>
+
+                <label for="phone">Phone Number (Optional)</label>
+                <input type="tel" id="phone" name="phone" placeholder="+234 801 234 5678">
+                
+                <h2>Payment Details</h2>
+                <p class="text-sm text-gray-600 mb-2"><em>You will be redirected to Paystack to complete your payment securely.</em></p>
+                <div class="border border-dashed border-gray-300 p-4 text-center mb-4 bg-gray-50 rounded-md">
+                    Secure Payment via Paystack
+                </div>
+
+                <button type="submit" class="btn-place-order">Proceed to Payment</button>
+            </form>
+        </div>
+
+        <div class="order-summary">
+            <h2>Order Summary</h2>
+            {% if cart_items %}
+                {% for item_key, item in cart_items.items %}
+                <div class="summary-item">
+                    <span class="item-name">
+                        {{ item.title }}
+                        {% if item.variant_title and item.variant_title != item.title %}
+                            <span class="variant-title">({{ item.variant_title }})</span>
+                        {% endif %}
+                        <span class="variant-title">x {{ item.quantity }}</span>
+                    </span>
+                    <span class="item-price">₦{{ item.total_price|floatformat:0 }}</span>
+                </div>
+                {% endfor %}
+                <div class="summary-total">
+                    <span class="total-label">Grand Total:</span>
+                    <span class="total-amount">₦{{ cart_total_price|floatformat:0 }}</span>
+                </div>
+            {% else %}
+                <p class="text-gray-600">Your cart is empty.</p>
+                <p><a href="{% url 'product_list' %}" class="mt-4 inline-block text-blue-600 hover:text-blue-500 underline">Continue Shopping</a></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_script %}
+<script>
+    // Optional: Simple script to clear messages after a delay if needed for non-AJAX pages
+    // This script is already in base.html's main script block, so it might be redundant here
+    // unless you want different timing or behavior specifically for this page.
+    // For consistency, it's better to rely on the global message handling in base.html.
+    /*
+    document.addEventListener('DOMContentLoaded', function () {
+        const messagesContainer = document.querySelector('.messages-container-global'); // Target global
+        if (messagesContainer && messagesContainer.children.length > 0) {
+            const pageSpecificMessages = Array.from(messagesContainer.children).filter(el => !el.dataset.isGlobal);
+            if (pageSpecificMessages.length > 0) {
+                 setTimeout(() => {
+                    pageSpecificMessages.forEach(alertDiv => {
+                        if (alertDiv.parentNode) { 
+                            alertDiv.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                            alertDiv.style.opacity = '0';
+                            alertDiv.style.transform = 'translateY(-20px)';
+                            setTimeout(() => {
+                               if (alertDiv.parentNode) alertDiv.remove();
+                            }, 500);
+                        }
+                    });
+                }, 5000); 
+            }
+        }
+    });
+    */
+</script>
+{% endblock extra_script %}

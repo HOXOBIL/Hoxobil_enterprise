@@ -1,0 +1,395 @@
+{% extends "mystore/base.html" %}
+{% load static %}
+
+{% block title %}{{ product.title|default:"Product Details" }} - HOXOBIL{% endblock title %}
+
+{% block extra_head %}
+    <style>
+        /* Styles specific to product_detail.html */
+        .page-content-detail { /* Specific class for detail page content area */
+            padding: 2rem 1rem; /* Consistent padding */
+        }
+        .product-detail-container {
+            max-width: 1100px;
+            margin: 0 auto; /* Centered, top/bottom margin handled by page-content-detail */
+            background-color: #fff;
+            padding: 2rem; /* p-8 */
+            border-radius: 0.75rem; /* Tailwind rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); /* Tailwind shadow-lg */
+            display: grid;
+            grid-template-columns: 1fr; /* Default to single column */
+            gap: 2.5rem;
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .product-detail-container {
+                grid-template-columns: 1fr 1fr; /* Two columns on medium screens and up */
+            }
+        }
+
+        .product-images .main-image img {
+            width: 100%;
+            max-height: 500px;
+            object-fit: contain; 
+            border-radius: 0.5rem; /* Tailwind rounded-lg */
+            border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+            margin-bottom: 1rem;
+        }
+        .thumbnail-images {
+            display: flex;
+            gap: 0.75rem; /* gap-3 */
+            justify-content: center; 
+            flex-wrap: wrap; 
+        }
+        .thumbnail-images img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 0.375rem; /* Tailwind rounded-md */
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+        .thumbnail-images img:hover, .thumbnail-images img.active-thumb {
+            border-color: #2563eb; /* Tailwind blue-600 */
+        }
+
+        .product-info h1 {
+            font-size: 2.25rem; /* text-3xl */
+            line-height: 2.5rem;
+            color: #111827; /* gray-900 */
+            margin-bottom: 0.75rem; /* mb-3 */
+            font-weight: 700; /* font-bold */
+        }
+        .product-info .price {
+            font-size: 1.875rem; /* text-3xl */
+            color: #2563eb; /* blue-600 */
+            font-weight: 700; /* font-bold */
+            margin-bottom: 1.5rem; /* mb-6 */
+        }
+        .product-info .description {
+            margin-bottom: 1.5rem; /* mb-6 */
+            line-height: 1.75; /* leading-relaxed */
+            color: #4b5563; /* gray-600 */
+        }
+        .product-info .description h3 { 
+            font-size: 1.125rem; /* text-lg */
+            margin-top: 1rem; /* mt-4 */
+            margin-bottom: 0.5rem; /* mb-2 */
+            color: #1f2937; /* gray-800 */
+            font-weight: 600; /* font-semibold */
+        }
+
+        .variant-selection .form-group {
+            margin-bottom: 1.25rem; /* mb-5 */
+        }
+        .variant-selection label {
+            display: block;
+            margin-bottom: 0.5rem; /* mb-2 */
+            font-weight: 500; /* font-medium */
+            font-size: 0.875rem; /* text-sm */
+            color: #374151; /* gray-700 */
+        }
+        .variant-selection select, .variant-selection input[type="number"] {
+            width: 100%;
+            padding: 0.65rem 0.75rem; /* py-2.5 px-3 */
+            border: 1px solid #d1d5db; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            font-size: 1rem;
+            background-color: #fff;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); /* shadow-sm */
+        }
+        .variant-selection select option:disabled {
+            color: #9ca3af; /* gray-400 */
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        .variant-selection select:disabled {
+            background-color: #e5e7eb; /* gray-200 */
+            cursor: not-allowed;
+        }
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem; /* gap-2 */
+        }
+        .quantity-selector input[type="number"] {
+            width: 70px;
+            text-align: center;
+        }
+
+        .btn-add-to-cart-detail { 
+            background-color: #10b981; /* Tailwind green-500 */ color: white; border: none;
+            padding: 0.85rem 2rem; text-align: center; text-decoration: none;
+            display: block; font-size: 1.1rem; font-weight: 600; /* font-semibold */
+            border-radius: 0.5rem; /* rounded-lg */ cursor: pointer; 
+            transition: background-color 0.3s ease, opacity 0.3s;
+            width: 100%; margin-top: 1.5rem; /* mt-6 */
+        }
+        .btn-add-to-cart-detail:hover { background-color: #059669; /* Tailwind green-600 */ }
+        .btn-add-to-cart-detail:disabled { background-color: #d1d5db; /* gray-300 */ cursor: not-allowed; opacity: 0.7; }
+        
+        .availability-info {
+            font-size: 0.9rem;
+            margin-top: 0.5rem; /* mt-2 */
+            min-height: 1.2em; 
+        }
+        .availability-info .in-stock { color: #10b981; /* green-500 */ font-weight: 600; }
+        .availability-info .out-of-stock { color: #ef4444; /* red-500 */ font-weight: 600; }
+
+        @media (max-width: 992px) { 
+            .product-images .main-image img {
+                max-height: 400px;
+            }
+        }
+        @media (max-width: 768px) { 
+            /* Header responsive styles are in base.html */
+            /* Global messages container styles are in base.html */
+            .product-detail-container {
+                padding: 1.5rem; /* p-6 for smaller screens */
+            }
+            .product-info h1 { font-size: 1.8rem; }
+            .product-info .price { font-size: 1.5rem; }
+        }
+    </style>
+{% endblock extra_head %}
+
+{% block content %}
+<div class="page-content-detail">
+    {% if product %}
+    <div class="product-detail-container">
+        <div class="product-images">
+            <div class="main-image">
+                <img id="mainProductImage" src="{{ product.images.0.src|default:'https://placehold.co/600x500?text=No+Image' }}" alt="{{ product.title }}">
+            </div>
+            {% if product.images|length > 1 %}
+            <div class="thumbnail-images">
+                {% for image in product.images %}
+                <img src="{{ image.src }}" alt="{{ product.title }} thumbnail {{ forloop.counter }}" 
+                     onclick="document.getElementById('mainProductImage').src='{{ image.src }}'; setActiveThumbnail(this);"
+                     class="{% if forloop.first %}active-thumb{% endif %}">
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="product-info">
+            <h1>{{ product.title }}</h1>
+            <div class="price" id="product-detail-price" data-base-price="{{ product.variants.0.price_ngn|floatformat:0|default:product.price|floatformat:0 }}">
+                 ₦{{ product.variants.0.price_ngn|floatformat:0|default:product.price|floatformat:0 }}
+            </div>
+            <div class="description">
+                {{ product.description|safe|linebreaksbr }}
+            </div>
+            <div class="variant-selection">
+                {% if product.options and product.options|length > 0 %}
+                    {% for option in product.options %}
+                    <div class="form-group">
+                        <label for="option-{{ product.id }}-{{ option.name|slugify }}" class="text-sm font-medium text-gray-700">{{ option.name }}:</label>
+                        <select name="option_{{ option.name|slugify }}" id="option-{{ product.id }}-{{ option.name|slugify }}" class="structured-variant-option-selector mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <option value="">Select {{ option.name }}</option>
+                            {% for value in option.values %}
+                                <option value="{{ value.id }}">{{ value.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endfor %}
+                {% elif product.variants|length > 1 %} 
+                    <div class="form-group" id="single-variant-selector-group-{{product.id}}">
+                        <label for="variant-selector-detail-{{product.id}}" class="text-sm font-medium text-gray-700">Select Variant:</label>
+                        <select id="variant-selector-detail-{{product.id}}" class="single-variant-option-selector mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            {% for variant in product.variants %}
+                                {% if variant.is_enabled and variant.is_available %}
+                                <option value="{{ variant.id }}" data-price-ngn="{{ variant.price_ngn|floatformat:0 }}" data-available="{{variant.is_available|yesno:'true,false'}}">
+                                    {{ variant.title }} (₦{{ variant.price_ngn|floatformat:0 }})
+                                </option>
+                                {% else %}
+                                <option value="{{ variant.id }}" disabled> {{ variant.title }} (Unavailable) </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% elif product.variants|length == 1 %}
+                     <input type="hidden" id="single-variant-selector-detail-{{product.id}}" value="{{ product.variants.0.id }}">
+                     <p class="text-gray-700"><strong class="font-medium">{{ product.options.0.name|default:"Variant" }}:</strong> {{ product.variants.0.title }}</p>
+                {% else %}
+                    <p class="text-gray-500">No variants available for this product.</p>
+                {% endif %}
+                <div class="form-group mt-4">
+                    <label for="quantity-detail-{{product.id}}" class="text-sm font-medium text-gray-700">Quantity:</label>
+                    <div class="quantity-selector">
+                        <input type="number" id="quantity-detail-{{product.id}}" name="quantity" value="1" min="1" class="mt-1 block w-20 text-center pl-3 pr-1 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                    </div>
+                </div>
+                <div class="availability-info mt-2" id="variant-availability-{{product.id}}"></div>
+            </div>
+            <button type="button" class="btn-add-to-cart-detail" id="btn-add-to-cart-detail-page-{{product.id}}" data-product-id="{{ product.id }}" data-add-to-cart-url="{% url 'add_to_cart' product.id %}">
+                Add to Cart
+            </button>
+        </div>
+    </div>
+    {% else %}
+        <div class="text-center py-16 px-4">
+            <h2 class="text-2xl font-semibold text-gray-700">Product Not Found</h2>
+            <p class="text-gray-500 mt-2">{{ error|default:"The product you are looking for does not exist or is unavailable." }}</p>
+            <a href="{% url 'product_list' %}" class="mt-6 inline-block bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md">Back to Products</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}
+
+{% block extra_script %}
+    {% if product and product.variants %} {{ product.variants|json_script:"product-variants-data" }} {% else %} <script id="product-variants-data" type="application/json">[]</script> {% endif %}
+    {% if product and product.options %} {{ product.options|json_script:"product-options-data" }} {% else %} <script id="product-options-data" type="application/json">[]</script> {% endif %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const mainProductImage = document.getElementById('mainProductImage');
+    const priceDisplay = document.getElementById('product-detail-price');
+    const structuredOptionSelectors = document.querySelectorAll('.structured-variant-option-selector');
+    const singleVariantSelector = document.querySelector('.single-variant-option-selector'); 
+    const quantityInput = document.querySelector('input[id^="quantity-detail-"]'); 
+    const addToCartButtonDetail = document.querySelector('.btn-add-to-cart-detail'); 
+    const availabilityDisplay = document.querySelector('div[id^="variant-availability-"]'); 
+    let productVariantsData = []; let productOptionsData = []; 
+    try {
+        const variantsDataElement = document.getElementById('product-variants-data');
+        if (variantsDataElement) productVariantsData = JSON.parse(variantsDataElement.textContent);
+        const optionsDataElement = document.getElementById('product-options-data'); 
+        if (optionsDataElement) productOptionsData = JSON.parse(optionsDataElement.textContent);
+    } catch (e) { console.error("Error parsing product JSON data:", e); }
+
+    window.setActiveThumbnail = function(thumbElement) {
+        document.querySelectorAll('.thumbnail-images img').forEach(img => img.classList.remove('active-thumb'));
+        thumbElement.classList.add('active-thumb');
+    }
+    function getCurrentlySelectedOptionValueIds() {
+        const selectedIds = [];
+        if (structuredOptionSelectors.length > 0) {
+            structuredOptionSelectors.forEach(selector => { if (selector.value) selectedIds.push(String(selector.value)); });
+        }
+        return selectedIds;
+    }
+    function updateOptionAvailability() {
+        if (structuredOptionSelectors.length === 0 || productVariantsData.length === 0 || productOptionsData.length === 0) return;
+        structuredOptionSelectors.forEach(selectorToUpdate => {
+            const optionNameBeingUpdated = selectorToUpdate.dataset.optionName;
+            const originalValue = selectorToUpdate.value; 
+            Array.from(selectorToUpdate.options).forEach(optionElement => {
+                if (!optionElement.value) return; 
+                let currentSelectionsForTest = {};
+                structuredOptionSelectors.forEach(sel => {
+                    if (sel === selectorToUpdate) currentSelectionsForTest[sel.dataset.optionName] = optionElement.value; 
+                    else if (sel.value) currentSelectionsForTest[sel.dataset.optionName] = sel.value; 
+                });
+                const isPossible = productVariantsData.some(variant => {
+                    if (!variant.is_enabled) return false; 
+                    let tempMatch = true;
+                    for(const productOption of productOptionsData){
+                        const optionKeyName = productOption.name; 
+                        const variantOptionValueIdForThisType = variant.option_value_ids.find(id => productOption.values.some(val => String(val.id) === id));
+                        if (currentSelectionsForTest[optionKeyName]) { 
+                            if (String(currentSelectionsForTest[optionKeyName]) !== variantOptionValueIdForThisType) { tempMatch = false; break; }
+                        }
+                    }
+                    return tempMatch;
+                });
+                optionElement.disabled = !isPossible;
+                optionElement.style.color = isPossible ? '' : '#9ca3af';
+                optionElement.style.backgroundColor = isPossible ? '' : '#f3f4f6';
+            });
+            selectorToUpdate.value = originalValue; 
+        });
+    }
+    function findSelectedVariant() {
+        if (!productVariantsData || productVariantsData.length === 0) return null;
+        if (structuredOptionSelectors.length > 0 && productOptionsData.length > 0) {
+            const selectedOptionValueIds = getCurrentlySelectedOptionValueIds();
+            if (selectedOptionValueIds.length !== productOptionsData.length) return null; 
+            return productVariantsData.find(variant => {
+                if (!variant.option_value_ids || variant.option_value_ids.length !== selectedOptionValueIds.length) return false;
+                const matches = selectedOptionValueIds.every(selId => variant.option_value_ids.includes(selId)) && variant.option_value_ids.every(varOptId => selectedOptionValueIds.includes(varOptId)); 
+                return matches && variant.is_enabled;
+            });
+        }
+        if (singleVariantSelector && singleVariantSelector.value) return productVariantsData.find(v => String(v.id) === singleVariantSelector.value);
+        if (productVariantsData.length === 1) return productVariantsData[0];
+        return null; 
+    }
+    function updateProductUIDetail() {
+        if (structuredOptionSelectors.length > 0) updateOptionAvailability(); 
+        if (!priceDisplay && !availabilityDisplay && !addToCartButtonDetail) return; 
+        const selectedVariant = findSelectedVariant();
+        if (selectedVariant) {
+            if (priceDisplay) priceDisplay.textContent = `₦${Math.round(selectedVariant.price_ngn)}`;
+            if (availabilityDisplay) {
+                if (selectedVariant.is_available && selectedVariant.is_enabled) {
+                    availabilityDisplay.innerHTML = `<span class="in-stock">In Stock</span>`;
+                    if(addToCartButtonDetail) addToCartButtonDetail.disabled = false;
+                } else {
+                    availabilityDisplay.innerHTML = `<span class="out-of-stock">Out of Stock / Unavailable</span>`;
+                    if(addToCartButtonDetail) addToCartButtonDetail.disabled = true;
+                }
+            }
+        } else { 
+            if (priceDisplay && priceDisplay.dataset.basePrice) priceDisplay.textContent = `₦${Math.round(parseFloat(priceDisplay.dataset.basePrice))}`;
+            if (availabilityDisplay) availabilityDisplay.textContent = 'Please select all options to see availability.';
+            if(addToCartButtonDetail) addToCartButtonDetail.disabled = true; 
+        }
+    }
+    document.querySelectorAll('.structured-variant-option-selector, .single-variant-option-selector').forEach(s => s.addEventListener('change', updateProductUIDetail));
+    if (document.body.contains(priceDisplay) || document.body.contains(availabilityDisplay) || document.body.contains(addToCartButtonDetail)) updateProductUIDetail(); 
+    
+    if (addToCartButtonDetail) {
+        addToCartButtonDetail.addEventListener('click', function () {
+            const productId = this.dataset.productId; const url = this.dataset.addToCartUrl;
+            const originalButtonText = this.textContent; const selectedVariant = findSelectedVariant();
+            let selectedVariantId = null;
+
+            if (selectedVariant && selectedVariant.is_enabled && selectedVariant.is_available) selectedVariantId = selectedVariant.id;
+            else if (selectedVariant && (!selectedVariant.is_enabled || !selectedVariant.is_available)) { 
+                if(window.displayGlobalMessageInBase) window.displayGlobalMessageInBase('Selected variant is unavailable.', 'warning'); else alert('Selected variant is unavailable.'); return; 
+            }
+            else { 
+                if(window.displayGlobalMessageInBase) window.displayGlobalMessageInBase('Please select all product options.', 'warning'); else alert('Please select all product options.'); return; 
+            }
+            this.disabled = true; this.textContent = 'Adding...';
+            const formData = new FormData(); formData.append('quantity', quantityInput ? quantityInput.value : '1'); formData.append('selected_variant_id', selectedVariantId);
+            
+            fetch(url, { method: 'POST', headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }, body: formData })
+            .then(response => {
+                if (response.status === 401) { 
+                    return response.json().then(data => { 
+                        if (data && data.status === 'login_required' && data.login_url) {
+                            if (window.displayGlobalMessageInBase) window.displayGlobalMessageInBase(data.message || 'Please sign in to continue.', 'info'); else alert(data.message || 'Please sign in to continue.');
+                            window.location.href = data.login_url; 
+                        } else {
+                            if (window.displayGlobalMessageInBase) window.displayGlobalMessageInBase('Authentication required.', 'error'); else alert('Authentication required.');
+                        }
+                        throw new Error('Login required'); 
+                    }).catch(() => { 
+                        if (window.displayGlobalMessageInBase) window.displayGlobalMessageInBase('Authentication required. Please sign in.', 'info'); else alert('Authentication required. Please sign in.');
+                        let nextUrlFallback = encodeURIComponent(window.location.pathname + window.location.search);
+                        window.location.href = `{% url 'login' %}?next=${nextUrlFallback}`;
+                        throw new Error('Login required');
+                    });
+                }
+                if (!response.ok) { 
+                    return response.json().then(errData => { throw { serverError: true, data: errData, status: response.status }; })
+                                     .catch(() => { throw { serverError: false, message: `HTTP error ${response.status}` }; });
+                }
+                return response.json(); 
+            })
+            .then(data => {
+                let msg = data.message || (data.status === 'success' ? 'Item added!' : 'Could not add.');
+                let type = data.status === 'success' ? 'success' : 'error';
+                if(window.displayGlobalMessageInBase) window.displayGlobalMessageInBase(msg, type); else alert(msg);
+                if (data.status === 'success' && typeof data.cart_total_items !== 'undefined' && window.updateHeaderCartCount) window.updateHeaderCartCount(data.cart_total_items);
+            })
+            .catch(error => { if (error.message !== 'Login required') { console.error('AJAX Error:', error); let em = 'Error.'; if(error.serverError && error.data && error.data.message) em=error.data.message; else if(error.message) em=error.message; if(window.displayGlobalMessageInBase) window.displayGlobalMessageInBase(em,'error'); else alert(em);}})
+            .finally(() => { this.disabled = false; this.textContent = originalButtonText; });
+        });
+    }
+});
+</script>
+{% endblock extra_script %}
+</body>
+</html>

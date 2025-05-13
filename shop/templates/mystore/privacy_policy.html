@@ -1,0 +1,161 @@
+{% extends "mystore/base.html" %}
+{% load static %} {# Though likely not used in this specific content block, good practice #}
+
+{% block title %}Privacy Policy - HOXOBIL{% endblock title %}
+
+{% block extra_head %}
+    <style>
+        /* Styles specific to privacy_policy.html */
+        .page-content-privacy { /* Specific class for privacy page content area */
+            padding: 2rem 1rem; /* Consistent padding */
+        }
+        .privacy-container { /* Renamed to avoid conflict */
+            max-width: 800px; /* Consistent with other content pages */
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 2rem; /* p-8 */
+            border-radius: 0.75rem; /* Tailwind rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); /* Tailwind shadow-lg */
+        }
+        .privacy-container h1.page-main-title { /* Specific class for the main title */
+            font-size: 2.25rem; /* text-3xl */
+            line-height: 2.5rem;
+            font-weight: 700; /* font-bold */
+            margin-bottom: 2rem; /* mb-8 */
+            text-align: center;
+            color: #111827; /* gray-900 */
+        }
+        .privacy-container .last-updated {
+            text-align: center;
+            color: #6b7280; /* gray-500 */
+            margin-bottom: 2rem; /* mb-8 */
+        }
+
+        /* Styles for headings and paragraphs within the privacy content */
+        .content-section h2 {
+            font-size: 1.75rem; 
+            font-weight: 600; 
+            margin-top: 2rem; 
+            margin-bottom: 1rem; 
+            color: #1f2937; 
+            border-bottom: 1px solid #e5e7eb; 
+            padding-bottom: 0.5rem; 
+        }
+        .content-section h3 {
+            font-size: 1.25rem; 
+            font-weight: 600;
+            margin-top: 1.5rem; 
+            margin-bottom: 0.75rem; 
+            color: #374151; 
+        }
+        .content-section p, .content-section ul {
+            margin-bottom: 1rem; 
+            line-height: 1.75; 
+            color: #4b5563; 
+        }
+        .content-section ul {
+            list-style-type: disc;
+            padding-left: 1.5rem; 
+        }
+        .content-section a {
+            color: #2563eb; /* Tailwind blue-600 */
+            text-decoration: underline;
+        }
+        .content-section a:hover {
+            color: #1d4ed8; /* Tailwind blue-700 */
+        }
+    </style>
+{% endblock extra_head %}
+
+{% block content %}
+<div class="page-content-privacy">
+    {# Global messages from base.html will display here if any #}
+
+    <div class="privacy-container content-section"> {# Added content-section for consistent styling of h2, p, etc. #}
+        <h1 class="page-main-title">Privacy Policy</h1>
+        <p class="last-updated">Last Updated: <span id="lastUpdatedDate">May 11, 2025</span></p> {# Example Date #}
+
+        <h2>1. Introduction</h2>
+        <p>Welcome to HOXOBIL ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy notice, or our practices with regards to your personal information, please contact us at <a href="mailto:privacy@hoxobil.com">privacy@hoxobil.com</a>.</p>
+        <p>This privacy notice describes how we might use your information if you visit our website at www.hoxobil.com (the "Website"), use our services, or otherwise engage with us. Reading this privacy notice will help you understand your privacy rights and choices.</p>
+
+        <h2>2. Information We Collect</h2>
+        <p>We collect personal information that you voluntarily provide to us when you register on the Website, express an interest in obtaining information about us or our products and Services, when you participate in activities on the Website (such as entering competitions, promotions or surveys) or otherwise when you contact us.</p>
+        
+        <h3>2.1. Personal Information You Disclose to Us</h3>
+        <p>The personal information that we collect depends on the context of your interactions with us and the Website, the choices you make and the products and features you use. The personal information we collect may include the following:</p>
+        <ul>
+            <li><strong>Contact Data:</strong> Name, email address, phone number, shipping address, billing address.</li>
+            <li><strong>Payment Data:</strong> When you make purchases, our payment processor (Paystack) may collect data necessary to process your payment. All payment data is stored by Paystack and you should review its privacy policies.</li>
+            <li><strong>Account Data:</strong> Usernames, passwords, purchase history, preferences.</li>
+            <li><strong>Competition Data:</strong> Information you provide when participating in competitions.</li>
+        </ul>
+
+        <h3>2.2. Information Automatically Collected</h3>
+        <p>We automatically collect certain information when you visit, use or navigate the Website. This information does not reveal your specific identity but may include device and usage information, such as your IP address, browser and device characteristics, operating system, language preferences, referring URLs, device name, country, location, and other technical information. This information is primarily needed to maintain the security and operation of our Website, and for our internal analytics and reporting purposes.</p>
+        <p>Like many businesses, we also collect information through cookies and similar technologies.</p>
+
+        <h2>3. How We Use Your Information</h2>
+        <p>We use personal information collected via our Website for a variety of business purposes described below:</p>
+        <ul>
+            <li><strong>To facilitate account creation and logon process.</strong></li>
+            <li><strong>To manage user accounts.</strong></li>
+            <li><strong>To send administrative information to you.</strong></li>
+            <li><strong>To fulfill and manage your orders.</strong> This includes coordination with Printify and Paystack.</li>
+            <li><strong>To manage prize draws and competitions.</strong></li>
+            <li><strong>To request feedback.</strong></li>
+            <li><strong>To protect our Services.</strong> (e.g., for fraud monitoring).</li>
+            <li><strong>For other business purposes.</strong> (e.g., data analysis, improving services).</li>
+        </ul>
+
+        <h2>4. How We Share Your Information</h2>
+        <p>We may process or share your data based on the following legal basis:</p>
+        <ul>
+            <li><strong>Consent</strong></li>
+            <li><strong>Legitimate Interests</strong></li>
+            <li><strong>Performance of a Contract:</strong> (e.g., sharing shipping info with Printify, delivery partners).</li>
+            <li><strong>Payment Processing:</strong> (e.g., with Paystack).</li>
+            <li><strong>Legal Obligations</strong></li>
+            <li><strong>Vital Interests</strong></li>
+        </ul>
+        <p>More specifically, we may need to share your personal information in situations like: Business Transfers, Affiliates, Business Partners (Printify, Paystack, shipping companies).</p>
+        
+        <h2>5. Cookies and Tracking Technologies</h2>
+        <p>We may use cookies and similar tracking technologies. [Details about your cookie usage or link to a separate Cookie Policy].</p>
+
+        <h2>6. Data Security</h2>
+        <p>We have implemented appropriate technical and organizational security measures. However, no electronic transmission over the Internet or information storage technology can be guaranteed to be 100% secure.</p>
+
+        <h2>7. Your Privacy Rights</h2>
+        <p>In Nigeria (under the NDPR), you have rights such as access, rectification, erasure, restriction of processing, and data portability. To make such a request, please use the contact details provided below. You also have the right to complain to the Nigeria Data Protection Bureau (NDPB).</p>
+
+        <h2>8. Children's Privacy</h2>
+        <p>Our Website is not intended for children under 18. We do not knowingly collect data from children under 18.</p>
+
+        <h2>9. Changes to This Privacy Policy</h2>
+        <p>We may update this privacy notice from time to time. The updated version will be indicated by an updated "Last Updated" date. We encourage you to review this privacy notice frequently.</p>
+
+        <h2>10. Contact Us</h2>
+        <p>If you have questions or comments, email us at <a href="mailto:privacy@hoxobil.com">privacy@hoxobil.com</a> or by post to:</p>
+        <p>
+            HOXOBIL<br>
+            [Your Physical Address, if applicable]<br>
+            Lagos, Nigeria
+        </p>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_script %}
+    <script>
+        // Set the "Last Updated" date dynamically or ensure it's manually updated
+        // For dynamic update:
+        // const lastUpdatedElement = document.getElementById('lastUpdatedDate');
+        // if (lastUpdatedElement) {
+        //     const today = new Date();
+        //     const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        //     lastUpdatedElement.textContent = today.toLocaleDateString('en-US', options);
+        // }
+        // For now, please manually update the date in the HTML text.
+    </script>
+{% endblock extra_script %}

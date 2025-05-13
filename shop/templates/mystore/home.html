@@ -1,0 +1,166 @@
+{% extends "mystore/base.html" %}
+{% load static %}
+
+{% block title %}HOXOBIL - Unleashing Perfection Together{% endblock title %}
+
+{% block extra_head %}
+    {# Styles specific to home.html hero, team sections #}
+    <style>
+        .hero { 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            min-height: 85vh; text-align: center; padding: 3rem 2rem; color: #fff; 
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{% static "images/logo/o.png" %}'); /* Ensure this path is correct */
+            background-size: cover; background-position: center center; background-attachment: fixed; 
+        }
+        .hero h1 { font-size: 3.5rem; margin-bottom: 0.5rem; font-weight: 700; text-shadow: 2px 2px 8px rgba(0,0,0,0.5); }
+        .hero .slogan { font-size: 1.8rem; font-weight: 500; margin-bottom: 1.5rem; color: #e0e0e0; text-shadow: 1px 1px 6px rgba(0,0,0,0.5); }
+        .hero .sub-text { font-size: 1.2rem; margin-bottom: 2.5rem; color: #d0d0d0; max-width: 600px; margin-left: auto; margin-right: auto; }
+        
+        .btn.hero-btn { 
+            padding: 0.9rem 2.2rem; background: #007bff; color: #fff; text-decoration: none;
+            border-radius: 0.5rem; font-weight: 600; font-size: 1.05rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: none;
+        }
+        .btn.hero-btn:hover { background: #0056b3; transform: translateY(-2px); }
+
+        .content-section { padding: 4rem 2rem; text-align: center; }
+        .content-section.bg-white { background-color: #fff; }
+        .content-section.bg-light { background-color: #f8f9fa; } 
+        
+        .section-title { font-size: 2.5rem; margin-bottom: 1rem; color: #1f2937; font-weight: 600; position: relative; display: inline-block; }
+        .section-title::after { content: ''; display: block; width: 60px; height: 3px; background-color: #2563eb; margin: 0.5rem auto 2rem auto; }
+        
+        .team-section { padding: 3rem 1rem; }
+        .team-section h2.main-team-title { font-size: 2.5rem; margin-bottom: 2.5rem; color: #1f2937; font-weight: 600; text-align: center; }
+        
+        /* Styles for team sections */
+        .team-category-title { font-size: 1.8rem; font-weight: 600; color: #374151; margin-top: 3rem; margin-bottom: 1.5rem; text-align: center; }
+        .team-category-title:first-of-type { margin-top: 0; } /* No top margin for the very first category title if it's the start of the section */
+
+        .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; max-width: 1100px; margin-left: auto; margin-right: auto; }
+        
+        .team-member { 
+            background: #fff; 
+            padding: 1.5rem; 
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); /* shadow-md */
+            transition: transform 0.3s ease, box-shadow 0.3s ease; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+        .team-member:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); /* shadow-xl */
+        }
+        .team-member img.team-photo { /* Unified class for team photos */
+            width: 150px; 
+            height: 150px; 
+            border-radius: 9999px; /* rounded-full */
+            object-fit: cover; 
+            margin-bottom: 1rem; 
+            border: 4px solid #2563eb; /* Tailwind blue-600 */
+        }
+        .team-member h3 { 
+            font-size: 1.4rem; 
+            margin-bottom: 0.5rem; 
+            color: #1f2937; /* gray-800 */
+        }
+        .team-member .role { 
+            font-size: 1rem; 
+            color: #2563eb; /* blue-600 */
+            margin-bottom: 0.75rem; 
+            font-weight: 500; /* font-medium */
+        }
+        .team-member p.description { 
+            font-size: 0.95rem; 
+            line-height: 1.6; 
+            flex-grow: 1; 
+            color: #4b5563; /* gray-600 */
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.8rem; }
+            .hero .slogan { font-size: 1.5rem; }
+            .hero .sub-text { font-size: 1.1rem; }
+            .content-section, .team-section { padding: 3rem 1rem; }
+            .section-title, .team-section h2.main-team-title { font-size: 2rem; }
+            .team-category-title { font-size: 1.5rem; }
+            .team-member img.team-photo { width: 120px; height: 120px; }
+        }
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 2.2rem; }
+            .hero .slogan { font-size: 1.2rem; }
+            .hero .sub-text { font-size: 1rem; }
+            .btn.hero-btn { padding: 0.8rem 1.8rem; font-size: 0.95rem; }
+        }
+    </style>
+{% endblock extra_head %}
+
+{% block content %}
+    <section class="hero">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight">Welcome to HOXOBIL</h1>
+        <p class="text-xl md:text-3xl font-light mb-6 slogan">Unleashing Perfection.</p> {# Corrected Slogan #}
+        <p class="text-lg md:text-xl mb-10 max-w-3xl mx-auto sub-text">Style redefined. Wear your vibe. Globally inspired.</p> {# Corrected Sub-text #}
+        <a href="{% url 'product_list' %}" class="btn hero-btn">Shop Our Collections</a>
+    </section>
+
+    {# Removed the separate "Meet the Founder" section as it's now part of "Our Core Team" #}
+
+    <section class="content-section bg-light" id="team"> 
+        <h2 class="section-title text-3xl md:text-4xl">Meet the HOXOBIL Team</h2> 
+        
+        <h3 class="team-category-title">Leadership</h3>
+        <div class="team-grid">
+            <div class="team-member">
+                <img src="{% static 'images/team_photos/yanex.jpg' %}" alt="IBJ IYANUOLUWA - CEO" class="team-photo">
+                <h3>IBJ IYANUOLUWA DARASIMI</h3>
+                <p class="role">Founder & CEO</p>
+<p class="description">Iyanuoluwa is the founder and creative director of HOXOBIL, a brand that seamlessly blends contemporary streetwear with meaningful design. Through a thoughtful fusion of culture, innovation, and craftsmanship, he is not only building a brand but also establishing a distinguished presence in the fashion industry.</p>
+            </div>
+            <div class="team-member">
+                <img src="{% static 'images/team_photos/angel.jpg' %}" alt="IBJ IYANUOLUWA - CEO" class="team-photo">
+                <h3>CHIDIEBERE CHINEZE ANGEL</h3>
+                <p class="role">MANAGER</p>
+                <p class="description">Angel is the heartbeat behind the hustle — orchestrating every detail from sourcing to delivery with precision and passion. Without her, perfection wouldn’t just be impossible — it wouldn’t exist.</p>
+            </div>
+        </div>
+
+        <h3 class="team-category-title">Design & Creativity</h3>
+        <div class="team-grid">
+            <div class="team-member">
+                <img src="{% static 'images/team_photos/team.jpg' %}" alt="Zara Ibrahim - Lead Designer" class="team-photo">
+                <h3>Zara Ibrahim</h3>
+                <p class="role">Lead Designer</p>
+                <p class="description">Zara's creative genius is woven into every HOXOBIL design, bringing fresh perspectives and bold ideas.</p>
+            </div>
+            <div class="team-member">
+                <img src="{% static 'images/team_photos/team.jpg' %}" alt="Samuel Green - UX Designer" class="team-photo">
+                <h3>Samuel Green</h3>
+                <p class="role">UX Designer</p>
+                <p class="description">Samuel focuses on creating a seamless and intuitive online experience for all HOXOBIL customers.</p>
+            </div>
+        </div>
+
+        <h3 class="team-category-title">Marketing & Community</h3>
+        <div class="team-grid">
+            <div class="team-member">
+                <img src="{% static 'images/team_photos/team.jpg' %}" alt="Chinedu Okoro - Head of Marketing" class="team-photo">
+                <h3>Chinedu Okoro</h3>
+                <p class="role">Head of Marketing</p>
+                <p class="description">Chinedu crafts the HOXOBIL narrative, connecting our brand with a global audience and fostering our community.</p>
+            </div>
+            <div class="team-member">
+                <img src="{% static 'images/team_photos/team.jpg' %}" alt="Aisha Bello - Community Manager" class="team-photo">
+                <h3>Aisha Bello</h3>
+                <p class="role">Community Manager</p>
+                <p class="description">Aisha is the heart of our customer interaction, ensuring every voice is heard and valued.</p>
+            </div>
+        </div>
+    </section>
+{% endblock content %}
+
+{% block extra_script %}
+    {# Add any page-specific JavaScript for home.html here if needed #}
+{% endblock extra_script %}

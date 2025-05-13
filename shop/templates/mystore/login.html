@@ -1,0 +1,69 @@
+{% extends "mystore/base.html" %}
+{% load static %}
+
+{% block title %}Sign In - HOXOBIL{% endblock title %}
+
+{% block extra_head %}
+    <style>
+        /* Styles specific to the login form if needed, beyond Tailwind utilities */
+        /* Alert message styles are in base.html */
+    </style>
+{% endblock extra_head %}
+
+{% block content %}
+<div class="py-8 md:py-12"> {# Added padding for the content area #}
+    <div class="max-w-md mx-auto bg-white p-8 md:p-10 rounded-xl shadow-xl">
+        <h1 class="text-3xl font-bold text-center text-gray-900 mb-8">Sign In to HOXOBIL</h1>
+
+        {# Global messages from base.html will display general messages like successful logout #}
+        {# Display form-specific non-field errors here if any #}
+        {% if form.non_field_errors %}
+            <div class="mb-4">
+                {% for error in form.non_field_errors %}
+                    <div class="alert-message alert-error" role="alert">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="mb-4">
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+                    <input type="{{ field.field.widget.input_type }}" 
+                           name="{{ field.name }}" 
+                           id="{{ field.id_for_label }}"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 {% if field.errors %}border-red-500{% endif %}"
+                           {% if field.field.required %}required{% endif %}
+                           value="{{ field.value|default:'' }}">
+                    {% for error in field.errors %}
+                        <p class="text-xs text-red-600 mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            
+            <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+
+            <div class="mt-8">
+                <button type="submit" 
+                        class="w-full bg-black hover:bg-gray-800 text-white font-semibold py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black text-lg">
+                    Sign In
+                </button>
+            </div>
+        </form>
+        <p class="mt-6 text-center text-sm text-gray-600">
+            Don't have an account? 
+            <a href="{% url 'signup' %}" class="font-medium text-blue-600 hover:text-blue-500">
+                Sign Up
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_script %}
+    {# Add any page-specific JavaScript for login.html here if needed #}
+{% endblock extra_script %}

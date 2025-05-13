@@ -1,0 +1,239 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}HOXOBIL{% endblock title %}</title> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Tailwind classes will handle most body styling e.g., class="bg-gray-100" on body tag */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Ensures footer sticks to bottom */
+        }
+        /* Minimal shared styles for Django messages, prefer Tailwind utility classes where possible */
+        .alert-message { /* This class is used if you manually create message divs without Tailwind */
+            padding: 0.75rem 1.25rem; 
+            margin-bottom: 1rem; 
+            border-radius: 0.375rem; /* rounded-md */
+            font-weight: 500;
+        }
+        .alert-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; } /* Tailwind red-100, red-800, red-200 */
+        .alert-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; } /* Tailwind green-100, green-800, green-200 */
+        .alert-info { background-color: #e0f2fe; color: #075985; border: 1px solid #bae6fd; } /* Tailwind sky-100, sky-800, sky-200 */
+        .alert-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; } /* Tailwind amber-100, amber-800, amber-200 */
+
+        /* Styles for the global messages container that appears at the top */
+        .messages-container-global {
+            padding: 0 1rem; 
+            margin-top: 1rem; 
+            list-style: none; 
+            position: fixed;
+            top: 70px; /* Adjust if your header height changes significantly */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1001; /* Ensure it's above other content */
+            width: auto; /* Auto width based on content */
+            max-width: 90%; /* Prevent it from being too wide on large screens */
+        }
+        .messages-container-global .alert { /* Ensure alerts inside this specific container get animation */
+             opacity: 0; 
+             transform: translateY(-20px); 
+             animation: fadeInSlideDown 0.5s forwards;
+        }
+        @keyframes fadeInSlideDown { 
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            } 
+        }
+        /* End of minimal shared styles */
+    </style>
+    {% block extra_head %}{% endblock extra_head %} </head>
+<body class="bg-gray-100 text-gray-800">
+
+    <header class="bg-black text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0">
+                    <a href="{% url 'home' %}" class="flex items-center">
+                        <img class="h-12 w-auto sm:h-14" src="{% static 'images/logo/main_logo.png' %}" alt="HOXOBIL Logo"
+                             id="header-logo-image" onerror="handleLogoError(this);">
+                        <span id="logo-text-fallback-header" style="display:none; color: #fff; font-size: 1.8rem; font-weight: bold; letter-spacing: 1px;">HOXO<span class="text-blue-500">BIL</span></span>
+                    </a>
+                </div>
+
+                <nav class="hidden md:flex space-x-2 lg:space-x-4 items-center">
+                    <a href="{% url 'home' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'home' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Home</a>
+                    <a href="{% url 'product_list' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'product_list' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Products</a>
+                    <a href="{% url 'competition_page' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'competition_page' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Competition</a>
+                    
+                    {% if user.is_authenticated %}
+                        <a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Account</a> <a href="{% url 'logout' %}" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'login' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Sign In</a>
+                        <a href="{% url 'signup' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'signup' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Sign Up</a>
+                    {% endif %}
+                    <a href="{% url 'view_cart' %}" class="ml-4 p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white flex items-center cart-link" aria-label="View Shopping Cart">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span class="ml-2 text-sm font-medium bg-blue-500 text-white rounded-full px-2 py-0.5" id="cart-count-badge">
+                            {% if request.session.cart and request.session.cart|length > 0 %}{{ request.session.cart|length }}{% else %}0{% endif %}
+                        </span>
+                    </a>
+                </nav>
+
+                <div class="md:hidden flex items-center">
+                    <a href="{% url 'view_cart' %}" class="mr-2 p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white flex items-center cart-link-mobile" aria-label="View Shopping Cart">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        <span class="ml-1 text-sm font-medium bg-blue-500 text-white rounded-full px-1.5 py-0.5" id="cart-count-badge-mobile">
+                             {% if request.session.cart and request.session.cart|length > 0 %}{{ request.session.cart|length }}{% else %}0{% endif %}
+                        </span>
+                    </a>
+                    <button id="mobile-menu-button" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="block h-6 w-6" id="menu-icon-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        <svg class="hidden h-6 w-6" id="menu-icon-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="{% url 'home' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'home' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Home</a>
+                <a href="{% url 'product_list' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'product_list' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Products</a>
+                <a href="{% url 'competition_page' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'competition_page' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Competition</a>
+                 {% if user.is_authenticated %}
+                    <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Account</a>
+                    <a href="{% url 'logout' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'login' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Sign In</a>
+                    <a href="{% url 'signup' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'signup' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Sign Up</a>
+                {% endif %}
+                <a href="{% url 'checkout' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'checkout' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Checkout</a>
+                 <a href="{% url 'privacy_policy' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'privacy_policy' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Privacy Policy</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        <div class="messages-container-global" id="messages-container-dynamic-global">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        {% block content %}
+        {% endblock content %}
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 py-10 text-center mt-auto">
+        <div class="container mx-auto px-6">
+            <p>&copy; {% now "Y" %} HOXOBIL. All rights reserved. Unleashing Perfection Together.</p>
+            <p class="mt-2">
+               <a href="{% url 'privacy_policy' %}" class="hover:text-white">Privacy Policy</a> | 
+<a href="{% url 'terms_of_service' %}" class="hover:text-white">Terms of Service</a>
+            </p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuIconClosed = document.getElementById('menu-icon-closed');
+    const menuIconOpen = document.getElementById('menu-icon-open');
+    const cartCountBadge = document.getElementById('cart-count-badge'); 
+    const cartCountBadgeMobile = document.getElementById('cart-count-badge-mobile'); 
+
+    if (mobileMenuButton) {
+        mobileMenuButton.addEventListener('click', function () {
+            const isExpanded = this.getAttribute('aria-expanded') === 'true' || false;
+            this.setAttribute('aria-expanded', !isExpanded);
+            mobileMenu.classList.toggle('hidden');
+            if (menuIconClosed) menuIconClosed.classList.toggle('hidden'); 
+            if (menuIconOpen) menuIconOpen.classList.toggle('hidden');   
+        });
+    }
+
+    window.updateHeaderCartCount = function(count) {
+        if (cartCountBadge) {
+            cartCountBadge.textContent = count;
+        }
+        if (cartCountBadgeMobile) {
+            cartCountBadgeMobile.textContent = count;
+        }
+    };
+    
+    // --- Improved Logo Error Handling ---
+    const logoImageElement = document.getElementById('header-logo-image'); 
+    
+    function handleLogoError(imgElement) {
+        if (imgElement && imgElement instanceof HTMLElement) {
+            imgElement.style.display = 'none';
+        }
+        const fallbackTextElement = document.getElementById('logo-text-fallback-header');
+        if (fallbackTextElement && fallbackTextElement instanceof HTMLElement) {
+            fallbackTextElement.style.display = 'inline'; 
+        }
+    }
+
+    if (logoImageElement) {
+        logoImageElement.onerror = function() {
+            // console.warn("Logo image failed to load. Displaying fallback text.");
+            handleLogoError(this);
+        };
+        if (!logoImageElement.complete || (typeof logoImageElement.naturalWidth !== "undefined" && logoImageElement.naturalWidth === 0)) {
+            if (logoImageElement.src && logoImageElement.src !== window.location.href) { 
+                 // console.warn("Logo image appears broken on load. Displaying fallback text.");
+                 handleLogoError(logoImageElement);
+            }
+        }
+    }
+    // --- End Improved Logo Error Handling ---
+
+
+    const globalMessagesContainer = document.getElementById('messages-container-dynamic-global');
+    if (globalMessagesContainer) {
+        const initialMessages = globalMessagesContainer.querySelectorAll('.alert');
+        if (initialMessages.length > 0) {
+            setTimeout(() => {
+                initialMessages.forEach(msg => {
+                    if (msg.parentNode) { 
+                        const fadeOutAnimation = document.querySelector('style[data-animation="fade-out"]');
+                        if (fadeOutAnimation || (msg.style.animation && msg.style.animation.includes('fadeOut'))) {
+                            msg.style.animation = 'fadeOut 0.5s forwards'; 
+                            setTimeout(() => {
+                                if (msg.parentNode) msg.remove();
+                            }, 500);
+                        } else {
+                            if (msg.parentNode) msg.remove(); 
+                        }
+                    }
+                });
+            }, 5000); 
+        }
+    }
+    
+    // Ensure fadeOut animation style is present for dynamically added messages (if not already in a child template's extra_head)
+    if (!document.querySelector('style[data-animation="fade-out"]')) {
+        const styleSheetFadeOut = document.createElement("style");
+        styleSheetFadeOut.dataset.animation = "fade-out"; 
+        styleSheetFadeOut.type = "text/css";
+        styleSheetFadeOut.innerText = "@keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }";
+        document.head.appendChild(styleSheetFadeOut);
+    }
+});
+</script>
+{% block extra_script %}{% endblock extra_script %}
+</body>
+</html>

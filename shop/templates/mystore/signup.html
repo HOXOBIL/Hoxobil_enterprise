@@ -1,0 +1,62 @@
+{% extends "mystore/base.html" %}
+{% load static %}
+
+{% block title %}Create Account - HOXOBIL{% endblock title %}
+
+{% block extra_head %}
+    <style>
+        /* Styles specific to the signup form if needed, beyond Tailwind utilities */
+        /* .form-input and .btn-primary styles are now applied directly with Tailwind classes */
+        /* Alert message styles are in base.html, but you can override or add here if needed */
+    </style>
+{% endblock extra_head %}
+
+{% block content %}
+<div class="py-8 md:py-12"> {# Added padding for the content area #}
+    <div class="max-w-md mx-auto bg-white p-8 md:p-10 rounded-xl shadow-xl">
+        <h1 class="text-3xl font-bold text-center text-gray-900 mb-8">Create Your HOXOBIL Account</h1>
+
+        {# Messages will be displayed by the global messages container in base.html #}
+        {# If you had page-specific message placement, it would go here, but global is often better #}
+
+        <form method="post" action="{% url 'signup' %}">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="mb-4">
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+                    <input type="{{ field.field.widget.input_type }}" 
+                           name="{{ field.name }}" 
+                           id="{{ field.id_for_label }}"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 {% if field.errors %}border-red-500{% endif %}"
+                           {% if field.field.required %}required{% endif %}
+                           value="{{ field.value|default:'' }}">
+                    {% if field.help_text %}
+                        <p class="text-xs text-gray-500 mt-1">{{ field.help_text|safe }}</p>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <p class="text-xs text-red-600 mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <div class="mt-8">
+                <button type="submit" 
+                        class="w-full bg-black hover:bg-gray-800 text-white font-semibold py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black text-lg">
+                    Create Account
+                </button>
+            </div>
+        </form>
+        <p class="mt-6 text-center text-sm text-gray-600">
+            Already have an account? 
+            <a href="{% url 'login' %}" class="font-medium text-blue-600 hover:text-blue-500">
+                Sign In
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_script %}
+    {# Add any page-specific JavaScript for signup.html here if needed #}
+{% endblock extra_script %}

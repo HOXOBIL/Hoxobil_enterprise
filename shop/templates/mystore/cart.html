@@ -1,0 +1,245 @@
+{% extends "mystore/base.html" %}
+{% load static %}
+
+{% block title %}Your Shopping Cart - HOXOBIL{% endblock title %}
+
+{% block extra_head %}
+    <style>
+        /* Styles specific to cart.html */
+        .container-cart { /* Renamed to avoid conflict with potential .container in base.html if any */
+            max-width: 900px;
+            margin: 10px auto 20px auto; /* Adjusted margin to accommodate global messages */
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 0.75rem; /* Tailwind rounded-xl */
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        .page-title-cart { /* Renamed */
+            text-align: center;
+            color: #111827; /* Tailwind gray-900 */
+            margin-bottom: 1.5rem; /* mb-6 */
+            font-size: 2rem; /* text-3xl */
+            font-weight: 700; /* font-bold */
+        }
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem; /* mb-6 */
+        }
+        .cart-table th, .cart-table td {
+            text-align: left;
+            padding: 0.75rem; /* p-3 */
+            border-bottom: 1px solid #e5e7eb; /* Tailwind gray-200 */
+        }
+        .cart-table th {
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+            font-weight: 600; /* font-semibold */
+            color: #374151; /* Tailwind gray-700 */
+            font-size: 0.875rem; /* text-sm */
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .cart-table img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 0.375rem; /* rounded-md */
+            margin-right: 0.75rem; /* mr-3 */
+            vertical-align: middle; 
+        }
+        .product-info-cart { /* Renamed */
+            display: flex;
+            align-items: center;
+        }
+        .product-info-cart .product-title-cart { /* Renamed */
+            color: #1f2937; /* gray-800 */
+            font-weight: 500; /* font-medium */
+        }
+        .product-info-cart .variant-title-cart { /* Renamed */
+            display: block;
+            font-size: 0.875rem; /* text-sm */
+            color: #6b7280; /* gray-500 */
+        }
+        .quantity-input {
+            width: 60px; /* Increased width slightly */
+            padding: 0.5rem; /* p-2 */
+            text-align: center;
+            border: 1px solid #d1d5db; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            font-size: 1rem;
+        }
+        .remove-btn {
+            color: #ef4444; /* Tailwind red-500 */
+            text-decoration: none;
+            font-weight: 500; /* font-medium */
+            padding: 0.375rem 0.75rem; /* py-1.5 px-3 */
+            border: 1px solid #ef4444; /* Tailwind red-500 */
+            border-radius: 0.375rem; /* rounded-md */
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .remove-btn:hover {
+            background-color: #ef4444; /* Tailwind red-500 */
+            color: white;
+        }
+        .cart-summary {
+            text-align: right;
+            margin-bottom: 1.5rem; /* mb-6 */
+            padding-top: 1rem; /* pt-4 */
+            border-top: 1px solid #e5e7eb; /* gray-200 */
+        }
+        .cart-summary h3 {
+            font-size: 1.5rem; /* text-2xl */
+            color: #111827; /* gray-900 */
+            font-weight: 600; /* font-semibold */
+        }
+        .cart-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; 
+            gap: 0.75rem; /* gap-3 */
+            margin-top: 1rem; /* mt-4 */
+        }
+        .btn-cart { /* Renamed from .btn to avoid conflict with base.html's potential .btn */
+            padding: 0.75rem 1.5rem; /* py-3 px-6 */
+            text-decoration: none;
+            border-radius: 0.5rem; /* rounded-lg */
+            font-weight: 600; /* font-semibold */
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border: none; 
+        }
+        .btn-continue-shopping {
+            background-color: #6b7280; /* gray-500 */
+            color: white;
+        }
+        .btn-continue-shopping:hover {
+            background-color: #4b5563; /* gray-600 */
+        }
+        .btn-checkout {
+            background-color: #2563eb; /* blue-600 */
+            color: white;
+        }
+        .btn-checkout:hover {
+            background-color: #1d4ed8; /* blue-700 */
+        }
+        .empty-cart-message {
+            text-align: center;
+            font-size: 1.25rem; /* text-xl */
+            color: #6b7280; /* gray-500 */
+            padding: 3rem 0; /* py-12 */
+        }
+
+        @media (max-width: 768px) {
+            .cart-table thead { display: none; }
+            .cart-table, .cart-table tbody, .cart-table tr, .cart-table td {
+                display: block; width: 100%;
+            }
+            .cart-table tr {
+                margin-bottom: 1rem; /* mb-4 */ border: 1px solid #e5e7eb; /* gray-200 */
+                border-radius: 0.5rem; /* rounded-lg */ padding: 0.75rem; /* p-3 */
+            }
+            .cart-table td {
+                text-align: right; padding-left: 50%;
+                position: relative; border-bottom: none;
+                display: flex; 
+                justify-content: flex-end; 
+                align-items: center; 
+                min-height: 40px; 
+                padding-top: 0.5rem; /* py-2 */
+                padding-bottom: 0.5rem;
+            }
+            .cart-table td::before {
+                content: attr(data-label); position: absolute;
+                left: 0.75rem; /* p-3 */ width: calc(50% - 1.5rem); /* Adjust for padding */
+                padding-right: 0.75rem; font-weight: 600; text-align: left;
+                top: 50%;
+                transform: translateY(-50%);
+                line-height: 1.2; 
+                color: #4b5563; /* gray-600 */
+            }
+            .product-info-cart { justify-content: flex-end; flex-grow: 1; text-align: right; }
+            .product-info-cart img { margin-left: 0.75rem; margin-right: 0; }
+            .cart-actions { flex-direction: column; }
+            .btn-cart { width: 100%; margin-bottom: 0.75rem; /* mb-3 */ }
+            .btn-cart:last-child { margin-bottom: 0; }
+        }
+        @media (max-width: 480px) { 
+            .cart-table td { padding-left: 40%; } 
+            .cart-table td::before { width: calc(40% - 1.5rem); }
+        }
+    </style>
+{% endblock extra_head %}
+
+{% block content %}
+<div class="container-cart"> {# Using renamed class #}
+    <h1 class="page-title-cart">Your Shopping Cart</h1> {# Using renamed class #}
+
+    {# Global messages will be displayed by base.html's messages-container-global #}
+    {# If you had specific cart page messages, they could go here, but usually global is fine #}
+
+    {% if cart_items %}
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item_id_key, item_data in cart_items.items %}
+                <tr>
+                    <td data-label="Product">
+                        <div class="product-info-cart"> {# Using renamed class #}
+                            <img src="{{ item_data.image_url }}" alt="{{ item_data.variant_title|default:item_data.title }}">
+                            <div>
+                                <span class="product-title-cart">{{ item_data.title }}</span>
+                                {% if item_data.variant_title and item_data.variant_title != item_data.title %}
+                                    <span class="variant-title-cart">{{ item_data.variant_title }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td data-label="Price">₦{{ item_data.price_per_unit_decimal|floatformat:0 }}</td>
+                    <td data-label="Quantity">
+                        <form action="{% url 'add_to_cart' item_data.cart_key %}" method="post" style="display: inline;"> 
+                            {% csrf_token %}
+                            <input type="number" name="quantity" value="{{ item_data.quantity }}" min="1" class="quantity-input" onchange="this.form.submit()">
+                            <input type="hidden" name="update" value="true"> 
+                        </form>
+                    </td>
+                    <td data-label="Total">₦{{ item_data.total_price|floatformat:0 }}</td>
+                    <td data-label="Action">
+                        <a href="{% url 'remove_from_cart' item_data.cart_key %}" class="remove-btn">Remove</a> 
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="cart-summary">
+            <h3>Grand Total: ₦{{ cart_total_price|floatformat:0 }}</h3>
+        </div>
+
+        <div class="cart-actions">
+            <a href="{% url 'product_list' %}" class="btn-cart btn-continue-shopping">Continue Shopping</a>
+            <a href="{% url 'checkout' %}" class="btn-cart btn-checkout">Proceed to Checkout</a>
+        </div>
+
+    {% else %}
+        <p class="empty-cart-message">Your cart is currently empty.</p>
+        <div style="text-align: center;">
+            <a href="{% url 'product_list' %}" class="btn-cart btn-continue-shopping">Start Shopping</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}
+
+{% block extra_script %}
+    {# Add any page-specific JavaScript for cart.html here if needed #}
+    {# For example, if you wanted AJAX quantity updates without page reload #}
+{% endblock extra_script %}

@@ -1,0 +1,393 @@
+{% extends "mystore/base.html" %}
+{% load static %}
+
+{% block title %}HOXOBIL Pre-Launch Competition - Unleash Perfection!{% endblock title %}
+
+{% block extra_head %}
+    <meta name="csrf-token" content="{{ csrf_token }}"> {# CSRF token is already in base.html, but no harm if also here #}
+    {# Tailwind and Segoe UI font are loaded in base.html, so no need to repeat here #}
+    <style>
+        /* Styles specific to competition.html */
+        .hero-bg-competition {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            background-size: cover;
+            background-position: center;
+        }
+        .input-code::-webkit-outer-spin-button,
+        .input-code::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .input-code[type=number] {
+            -moz-appearance: textfield; 
+            appearance: textfield; 
+        }
+        
+        .team-section-title-competition { 
+            font-size: 2.25rem; 
+            line-height: 2.5rem; 
+            font-weight: 700; 
+            margin-bottom: 3rem; 
+            color: #1f2937; 
+        }
+        .team-category-title-competition {
+            font-size: 1.8rem; 
+            font-weight: 600;
+            color: #4a5568; 
+            margin-top: 3rem; 
+            margin-bottom: 1.5rem; 
+            text-align: center; 
+        }
+        .team-category-title-competition:first-of-type {
+            margin-top: 0; 
+        }
+        .team-grid-competition {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 2.5rem; 
+            max-width: 1100px; 
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .team-member-competition { 
+            background-color: #ffffff; 
+            padding: 1.5rem; 
+            border-radius: 0.5rem; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+            transition-property: box-shadow, transform;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+            text-align: center; 
+        }
+        .team-member-competition:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+            transform: translateY(-0.25rem);
+        }
+        .team-photo-competition { /* Unified class for team photos on this page */
+            width: 128px; 
+            height: 128px; 
+            border-radius: 9999px; 
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 1rem; 
+            object-fit: cover; 
+            border: 4px solid #2563eb; /* Tailwind blue-600 */
+        }
+        .team-member-competition h3 {
+            font-size: 1.25rem; 
+            font-weight: 600; 
+            color: #1f2937; 
+            margin-bottom: 0.25rem; 
+        }
+        .team-member-competition .role { 
+            color: #2563eb; 
+            font-weight: 500; 
+            margin-bottom: 0.5rem; 
+            text-transform: uppercase;
+            font-size: 0.875rem; 
+            letter-spacing: 0.05em; 
+        }
+        .team-member-competition p.description {
+            color: #4b5563; 
+            font-size: 0.875rem; 
+            margin-top: 0.5rem; 
+            line-height: 1.625; 
+        }
+
+        .btn-primary-competition { /* Specific class for competition button */
+            background-color: #1f2937; /* Tailwind gray-800 */
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary-competition:hover {
+            background-color: #374151; /* Tailwind gray-700 */
+        }
+        /* Alert messages for competition form use styles from base.html (.alert-message, .alert-error etc.) */
+        
+        .prize-claimed {
+            text-decoration: line-through;
+            color: #9ca3af; 
+        }
+
+        /* Countdown Timer Styles (from original competition.html) */
+        .countdown-timer-container {
+            margin-top: 2rem; 
+            margin-bottom: 2.5rem; 
+        }
+        .countdown-timer {
+            display: flex;
+            justify-content: center;
+            gap: 1rem; 
+            text-align: center;
+        }
+        .countdown-timer > div {
+            background-color: rgba(255, 255, 255, 0.1); 
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem; 
+            min-width: 80px; 
+        }
+        .countdown-timer .time-value {
+            font-size: 2.5rem; 
+            font-weight: 700; 
+            line-height: 1;
+            color: #ffffff; 
+        }
+        .countdown-timer .time-label {
+            font-size: 0.875rem; 
+            text-transform: uppercase;
+            letter-spacing: 0.05em; 
+            color: #d1d5db; 
+            margin-top: 0.25rem; 
+        }
+        .launched-message {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #22c55e; 
+        }
+    </style>
+{% endblock extra_head %}
+
+{% block content %}
+<main class="flex-grow"> {# This main tag is part of base.html, content block is inside it #}
+    <section class="hero-bg-competition text-white py-20 md:py-24">
+        <div class="container mx-auto px-6 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight">Welcome to the HOXOBIL Pre-Launch!</h1>
+            <p class="text-xl md:text-3xl font-light mb-6">"Unleashing Perfection Together."</p>
+            
+            <div id="countdown-timer-section" class="countdown-timer-container">
+                <h3 class="text-2xl font-semibold mb-4 text-yellow-400">Launching In:</h3>
+                <div id="countdown-timer" class="countdown-timer">
+                    <div><span id="days" class="time-value">00</span><div class="time-label">Days</div></div>
+                    <div><span id="hours" class="time-value">00</span><div class="time-label">Hours</div></div>
+                    <div><span id="minutes" class="time-value">00</span><div class="time-label">Mins</div></div>
+                    <div><span id="seconds" class="time-value">00</span><div class="time-label">Secs</div></div>
+                </div>
+                <div id="launched-message-container" class="mt-4" style="display: none;">
+                    <p class="launched-message">HOXOBIL Has Launched! Explore Now!</p>
+                </div>
+            </div>
+
+            <p class="text-lg md:text-xl mb-10 max-w-3xl mx-auto">
+                Get ready for something amazing! While we're putting the final touches,
+                join our exclusive code-cracking competition. Be one of the <strong class="font-semibold">3 lucky winners</strong> to snag an awesome prize!
+            </p>
+        </div>
+    </section>
+
+    <section id="competition" class="py-16 bg-white">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4 text-gray-800">Crack the Code & Win!</h2>
+            <p class="text-gray-600 mb-8 max-w-xl mx-auto">
+                We've hidden 3 secret 6-digit codes. Enter your guess below. If you find one, you win!
+                Good luck, perfection seekers!
+            </p>
+
+            <div class="max-w-md mx-auto bg-gray-50 p-8 rounded-xl shadow-lg">
+                <form id="competition-form">
+                    {# CSRF token is handled by base.html's meta tag for AJAX, but no harm here for non-AJAX fallback (though this form is AJAX only) #}
+                    {# {% csrf_token %} #} 
+                    <div class="mb-6">
+                        <label for="code-input" class="block text-sm font-medium text-gray-700 mb-2">Enter Your 6-Digit Code:</label>
+                        <input type="number" id="code-input" name="code"
+                               class="input-code appearance-none block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg text-center tracking-widest"
+                               placeholder="XXXXXX" maxlength="6" required
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)">
+                        <p class="text-xs text-gray-500 mt-1">Only numbers, 6 digits long.</p>
+                    </div>
+                    <button type="submit" id="submit-code-btn"
+                            class="w-full btn-primary-competition font-semibold py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black text-lg">
+                        Submit Guess
+                    </button>
+                </form>
+                <div id="competition-message" class="mt-6 text-lg">
+                    {# Competition AJAX messages will appear here, using .alert-message styles from base.html #}
+                </div>
+                <div class="mt-4 text-sm text-gray-600">
+                    <p>Prizes remaining: <strong id="prizes-left-count">{{ prizes_left|default:"3" }}</strong> out of 3.</p>
+                </div>
+                {% if launch_notes %}
+                <div class="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
+                    <h4 class="text-lg font-semibold text-blue-700 mb-2">A Special Note from the HOXOBIL Team:</h4>
+                    <p class="text-blue-600 text-sm leading-relaxed">{{ launch_notes|linebreaksbr }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section id="team" class="py-16 bg-gray-100 team-section">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="team-section-title-competition">Meet the HOXOBIL Team</h2>
+
+            <h3 class="team-category-title-competition">The Visionary</h3>
+            <div class="team-grid-competition" style="grid-template-columns: 1fr; max-width: 400px;"> 
+                <div class="team-member-competition">
+                    <img src="{% static 'images/team_photos/yanex.jpg' %}" alt="Iyanu - CEO" class="team-photo-competition">
+                    <h3>IBJ IYANUOLUWA</h3>
+                    <p class="role">Chief Executive Officer</p>
+                    <p class="description">
+                        Iyanuoluwa is the visionary behind <span class="font-semibold text-black">HOXOBIL</span> — a brand where streetwear meets substance. With a sharp eye for style and a heart for innovation, he fuses culture, creativity, and class into every design, building more than a brand — he's shaping a movement.
+                    </p>
+                </div>
+            </div>
+
+            <h3 class="team-category-title-competition">Core Operations & Strategy</h3>
+            <div class="team-grid-competition">
+                <div class="team-member-competition">
+                    <img src="https://placehold.co/150x150/28a745/ffffff?text=Bisi" alt="Bisi Adebayo - Operations Lead" class="team-photo-competition">
+                    <h3>Bisi Adebayo</h3>
+                    <p class="role">Operations Lead</p>
+                    <p class="description">Bisi ensures everything runs like clockwork, from sourcing to delivery, making perfection possible.</p>
+                </div>
+                <div class="team-member-competition">
+                    <img src="https://placehold.co/150x150/ffc107/333333?text=Chinedu" alt="Chinedu Okoro - Marketing & Community" class="team-photo-competition">
+                    <h3>Chinedu Okoro</h3>
+                    <p class="role">Marketing & Community</p>
+                    <p class="description">Chinedu connects with our amazing community, sharing the HOXOBIL story and listening to your feedback.</p>
+                </div>
+                <div class="team-member-competition">
+                    <img src="https://placehold.co/150x150/17a2b8/ffffff?text=Sam" alt="Samuel Green - UX Designer" class="team-photo-competition">
+                    <h3>Samuel Green</h3>
+                    <p class="role">UX Designer</p>
+                    <p class="description">Samuel focuses on creating a seamless and intuitive online experience for all HOXOBIL customers.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock content %}
+
+{% block extra_script %}
+    {# Pass launch datetime to JavaScript if available #}
+    {% if launch_datetime_iso %}
+        {{ launch_datetime_iso|json_script:"launch-datetime-data" }}
+    {% else %}
+        <script id="launch-datetime-data" type="application/json">null</script> {# Ensure the script tag exists for JS #}
+    {% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const competitionForm = document.getElementById('competition-form');
+    const codeInput = document.getElementById('code-input');
+    const messageDiv = document.getElementById('competition-message'); // For competition-specific messages
+    const submitButton = document.getElementById('submit-code-btn');
+    const prizesLeftSpan = document.getElementById('prizes-left-count');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    // globalMessagesContainer is defined in base.html, use window.displayGlobalMessageInBase
+
+    // --- Countdown Timer Logic ---
+    const countdownTimerElement = document.getElementById('countdown-timer');
+    const launchedMessageContainer = document.getElementById('launched-message-container');
+    let launchDateISO = null;
+    const launchDataElement = document.getElementById('launch-datetime-data');
+    
+    if (launchDataElement && launchDataElement.textContent) {
+        try {
+            launchDateISO = JSON.parse(launchDataElement.textContent); 
+        } catch(e) {
+            console.error("Error parsing launch date from script tag:", e);
+        }
+    }
+
+    function updateCountdown() {
+        if (!launchDateISO || !countdownTimerElement) {
+            if (countdownTimerElement) countdownTimerElement.innerHTML = "<p class='text-lg text-center text-yellow-300'>Launch date not set yet. Stay tuned!</p>";
+            return;
+        }
+
+        const launchTime = new Date(launchDateISO).getTime();
+        const now = new Date().getTime();
+        const distance = launchTime - now;
+
+        if (distance < 0) {
+            clearInterval(countdownInterval);
+            countdownTimerElement.style.display = 'none';
+            if(launchedMessageContainer) launchedMessageContainer.style.display = 'block';
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        if(document.getElementById('days')) document.getElementById('days').textContent = String(days).padStart(2, '0');
+        if(document.getElementById('hours')) document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+        if(document.getElementById('minutes')) document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+        if(document.getElementById('seconds')) document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+    }
+
+    let countdownInterval;
+    if (launchDateISO) {
+        updateCountdown(); 
+        countdownInterval = setInterval(updateCountdown, 1000); 
+    } else {
+        if(countdownTimerElement) countdownTimerElement.innerHTML = "<p class='text-lg text-center text-yellow-300'>Launch date coming soon!</p>";
+    }
+    // --- End Countdown Timer Logic ---
+
+
+    if (competitionForm) { 
+        competitionForm.addEventListener('submit', function (event) {
+            event.preventDefault(); 
+            const code = codeInput.value;
+
+            if (!/^\d{6}$/.test(code)) {
+                messageDiv.innerHTML = '<div class="alert-message alert-error">Please enter a valid 6-digit code.</div>';
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Checking...';
+            messageDiv.innerHTML = '<div class="alert-message alert-info">Checking your code...</div>';
+
+            fetch("{% url 'submit_competition_code' %}", { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded', 
+                    'X-CSRFToken': csrfToken
+                },
+                body: `code=${encodeURIComponent(code)}` 
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Use .alert-message class from base.html for styling these messages
+                if (data.status === 'success') {
+                    messageDiv.innerHTML = `<div class="alert-message alert-success">${data.message}</div>`;
+                    codeInput.disabled = true; 
+                    submitButton.textContent = 'You Won!';
+                    if (typeof data.prizes_left !== 'undefined') prizesLeftSpan.textContent = data.prizes_left;
+                    if (data.prizes_left === 0) {
+                        messageDiv.innerHTML += '<div class="alert-message alert-info mt-4">All prizes have been claimed! Thanks for playing.</div>';
+                        submitButton.textContent = 'Competition Over';
+                        submitButton.disabled = true; codeInput.disabled = true;
+                    }
+                } else if (data.status === 'failure') {
+                    messageDiv.innerHTML = `<div class="alert-message alert-error">${data.message}</div>`;
+                } else if (data.status === 'claimed') {
+                    messageDiv.innerHTML = `<div class="alert-message alert-info">${data.message}</div>`;
+                    if (typeof data.prizes_left !== 'undefined') prizesLeftSpan.textContent = data.prizes_left;
+                } else if (data.status === 'all_claimed') {
+                     messageDiv.innerHTML = `<div class="alert-message alert-info">${data.message}</div>`;
+                     prizesLeftSpan.textContent = '0';
+                     submitButton.textContent = 'Competition Over';
+                     submitButton.disabled = true; codeInput.disabled = true;
+                } else {
+                    messageDiv.innerHTML = `<div class="alert-message alert-error">${data.message || 'An unknown error occurred.'}</div>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                messageDiv.innerHTML = '<div class="alert-message alert-error">An error occurred. Please try again.</div>';
+            })
+            .finally(() => {
+                if (submitButton.textContent === 'Checking...') {
+                     submitButton.disabled = false;
+                     submitButton.textContent = 'Submit Guess';
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock extra_script %}

@@ -1,0 +1,177 @@
+{% extends "mystore/base.html" %}
+{% load static %}
+
+{% block title %}Terms of Service - HOXOBIL{% endblock title %}
+
+{% block extra_head %}
+    <style>
+        /* Styles specific to terms_of_service.html */
+        .page-content-terms { /* Specific class for terms page content area */
+            padding: 2rem 1rem; /* Consistent padding */
+        }
+        .terms-container { /* Renamed to avoid conflict */
+            max-width: 800px; /* Consistent with other content pages */
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 2rem; /* p-8 */
+            border-radius: 0.75rem; /* Tailwind rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); /* Tailwind shadow-lg */
+        }
+        .terms-container h1.page-main-title { /* Specific class for the main title */
+            font-size: 2.25rem; /* text-3xl */
+            line-height: 2.5rem;
+            font-weight: 700; /* font-bold */
+            margin-bottom: 2rem; /* mb-8 */
+            text-align: center;
+            color: #111827; /* gray-900 */
+        }
+        .terms-container .last-updated {
+            text-align: center;
+            color: #6b7280; /* gray-500 */
+            margin-bottom: 2rem; /* mb-8 */
+        }
+
+        /* Styles for headings and paragraphs within the terms content */
+        .content-section h2 { 
+            font-size: 1.75rem; 
+            font-weight: 600; 
+            margin-top: 2rem; 
+            margin-bottom: 1rem; 
+            color: #1f2937; 
+            border-bottom: 1px solid #e5e7eb; 
+            padding-bottom: 0.5rem; 
+        }
+        .content-section h3 {
+            font-size: 1.25rem; 
+            font-weight: 600;
+            margin-top: 1.5rem; 
+            margin-bottom: 0.75rem; 
+            color: #374151; 
+        }
+        .content-section p, .content-section ul, .content-section ol {
+            margin-bottom: 1rem; 
+            line-height: 1.75; 
+            color: #4b5563; 
+        }
+        .content-section ul {
+            list-style-type: disc;
+            padding-left: 1.5rem; 
+        }
+        .content-section ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+        }
+        .content-section a {
+            color: #2563eb; /* Tailwind blue-600 */
+            text-decoration: underline;
+        }
+        .content-section a:hover {
+            color: #1d4ed8; /* Tailwind blue-700 */
+        }
+    </style>
+{% endblock extra_head %}
+
+{% block content %}
+<div class="page-content-terms">
+    <div class="terms-container content-section"> 
+        <h1 class="page-main-title">Terms of Service</h1>
+        <p class="last-updated">Last Updated: <span id="termsLastUpdatedDate">[Date of Last Update - e.g., May 11, 2025]</span></p>
+
+       <h2>1. Agreement to Terms</h2>
+<p>These Terms of Service ("Terms") constitute a legally binding agreement made between you, whether personally or on behalf of an entity ("you") and HOXOBIL ("we," "us," or "our"), concerning your access to and use of the <strong>www.hoxobil.com</strong> website as well as any other media form, media channel, mobile website or mobile application related, linked, or otherwise connected thereto (collectively, the "Site").</p>
+<p>By accessing the Site, you agree that you have read, understood, and agreed to be bound by all of these Terms. IF YOU DO NOT AGREE WITH ALL OF THESE TERMS, THEN YOU ARE EXPRESSLY PROHIBITED FROM USING THE SITE AND MUST DISCONTINUE USE IMMEDIATELY.</p>
+<p>Supplemental terms and conditions or documents that may be posted on the Site from time to time are hereby expressly incorporated herein by reference. We reserve the right, at our sole discretion, to make changes or modifications to these Terms at any time and for any reason. You will be alerted about any changes by the updated "Last Updated" date of these Terms. It is your responsibility to review these Terms periodically to stay informed of updates.</p>
+
+<h2>2. Intellectual Property Rights</h2>
+<p>Unless otherwise indicated, the Site is our proprietary property and all source code, databases, functionality, software, website designs, audio, video, text, photographs, and graphics on the Site (collectively, the "Content") and the trademarks, service marks, and logos contained therein (the "Marks") are owned or licensed by us, and are protected by copyright and trademark laws and various other intellectual property rights under Nigerian law and international conventions.</p>
+<p>The Content and Marks are provided on the Site "AS IS" for your personal use only. No part of the Site or any Content or Marks may be copied, reproduced, aggregated, republished, uploaded, posted, publicly displayed, encoded, translated, transmitted, distributed, sold, licensed, or otherwise exploited for any commercial purpose without our express prior written permission.</p>
+
+<h2>3. User Representations</h2>
+<p>By using the Site, you represent and warrant that: (1) all registration information you submit will be true, accurate, current, and complete; (2) you will maintain the accuracy of such information and promptly update it as necessary; (3) you have the legal capacity and agree to comply with these Terms; (4) you are not a minor in your jurisdiction, or if you are, you have parental consent to use the Site; (5) you will not access the Site through automated or non-human means; (6) you will not use the Site for any unlawful or unauthorized purpose; and (7) your use of the Site does not violate any applicable law or regulation.</p>
+
+<h2>4. User Registration</h2>
+<p>You may be required to register with the Site. You agree to keep your password confidential and will be responsible for all use of your account and password. We reserve the right to remove, reclaim, or change a username you choose if we determine, at our sole discretion, that such username is inappropriate, obscene, or otherwise objectionable.</p>
+
+<h2>5. Products</h2>
+<p>We make every effort to display the colors, features, specifications, and details of our products as accurately as possible. However, we do not guarantee that such details will be accurate, complete, reliable, current, or free of errors, and your electronic display may not accurately reflect the actual product.</p>
+<p>All products are subject to availability, and we cannot guarantee items will be in stock. We reserve the right to discontinue any product at any time for any reason. All prices are subject to change.</p>
+
+<h2>6. Purchases and Payment</h2>
+<p>We accept the following forms of payment: Visa, Mastercard, Verve, and Bank Transfers via Paystack. You agree to provide current, complete, and accurate purchase and account information for all transactions made on the Site, and to promptly update your information as needed.</p>
+<p>All payments are made in Nigerian Naira (NGN). You authorize us (via our payment processor, Paystack) to charge your selected payment method for any applicable charges, including taxes and shipping. We reserve the right to correct any errors in pricing, even if we have already requested or received payment.</p>
+<p>We reserve the right to refuse or limit any order at our discretion, including those placed under the same customer account, payment method, or shipping address.</p>
+
+<h2>7. Order Fulfillment and Print-on-Demand</h2>
+<p>Our products are created using a print-on-demand model through partners such as Printify. This means your items are custom-made upon order and shipped directly from our fulfillment partner.</p>
+<p>Production and shipping times may vary. Once shipped, tracking information will be provided. HOXOBIL is not liable for delays or defects due to third-party fulfillment, but we will assist in resolving such issues in accordance with the fulfillment provider’s policies.</p>
+
+<h2>8. Return/Refund Policy</h2>
+<p>Please refer to our dedicated <a href="/refund-policy">Return/Refund Policy</a> page for details on returns, exchanges, and refunds. Because our items are made to order, returns may only be accepted under specific conditions as outlined on that page.</p>
+
+<h2>9. Prohibited Activities</h2>
+<p>You may not use the Site for any unlawful or unauthorized purpose. Prohibited activities include, but are not limited to:</p>
+<ul>
+  <li>Systematic data collection or scraping without permission</li>
+  <li>Unauthorized framing or linking</li>
+  <li>Attempting to impersonate another user</li>
+  <li>Harassing or threatening HOXOBIL staff or users</li>
+  <li>Uploading viruses, spam, or other malicious code</li>
+</ul>
+
+<h2>10. User Generated Contributions</h2>
+<p>If enabled, you may post content such as reviews, comments, or other submissions. You grant us an unrestricted, worldwide, royalty-free license to use, modify, and display your contributions in connection with the Site. You agree not to post anything unlawful, abusive, or otherwise inappropriate.</p>
+
+<h2>11. Site Management</h2>
+<p>We reserve the right to monitor the Site for violations, take legal action as necessary, and remove or restrict access to content or users at our discretion. This helps ensure the Site remains a safe and respectful space.</p>
+
+<h2>12. Term and Termination</h2>
+<p>These Terms remain in effect while you use the Site. We may terminate or restrict your access for any reason, including violation of these Terms or applicable law, at our sole discretion and without notice.</p>
+
+<h2>13. Modifications and Interruptions</h2>
+<p>We reserve the right to change or discontinue the Site or any part thereof at any time, with or without notice. We are not liable for any modification, price change, suspension, or discontinuation of the Site or services.</p>
+
+<h2>14. Governing Law</h2>
+<p>These Terms shall be governed by and construed in accordance with the laws of the Federal Republic of Nigeria, without regard to conflict of law principles.</p>
+
+<h2>15. Dispute Resolution</h2>
+<p>Disputes shall be resolved via informal negotiations initially. If unresolved, disputes may be submitted to binding arbitration or a competent court within Lagos State, Nigeria. (You are encouraged to seek legal advice to fully draft this section.)</p>
+
+<h2>16. Disclaimer</h2>
+<p>THE SITE IS PROVIDED ON AN "AS-IS" AND "AS-AVAILABLE" BASIS. TO THE MAXIMUM EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. WE DO NOT GUARANTEE THAT THE SITE WILL BE ERROR-FREE, UNINTERRUPTED, OR FREE OF VIRUSES.</p>
+
+<h2>17. Limitations of Liability</h2>
+<p>IN NO EVENT SHALL WE BE LIABLE TO YOU OR ANY THIRD PARTY FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF YOUR USE OF THE SITE, EVEN IF WE HAVE BEEN ADVISED OF SUCH POSSIBILITY.</p>
+
+<h2>18. Indemnification</h2>
+<p>You agree to indemnify and hold us harmless from any claims, losses, or demands (including legal fees) arising from your use of the Site, your breach of these Terms, or your violation of any third-party rights.</p>
+
+<h2>19. User Data</h2>
+<p>We maintain data you provide for the purpose of Site operations. While we perform regular backups, you are solely responsible for all data you transmit or generate while using the Site. We are not liable for any loss or corruption of such data.</p>
+
+<h2>20. Contact Us</h2>
+<p>If you have any questions, concerns, or need assistance regarding the use of our site, please feel free to reach out to us at:</p>
+        <p>
+            HOXOBIL ENTERPRISES<br>
+        IBJ Iyanuoluwa, Founder<br>
+        LUTH, Idi-Araba<br>
+        Lagos State, 102215<br>
+        Nigeria<br>
+  <a href="mailto:help.hoxobil@gmail.com">help.hoxobil@gmail.com</a>
+        </p>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_script %}
+    <script>
+        // Set the "Last Updated" date dynamically or ensure it's manually updated
+        // const termsLastUpdatedElement = document.getElementById('termsLastUpdatedDate');
+        // if (termsLastUpdatedElement) {
+        //     const today = new Date();
+        //     const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        //     termsLastUpdatedElement.textContent = today.toLocaleDateString('en-US', options);
+        // }
+        // For now, please manually update the date in the HTML text.
+    </script>
+{% endblock extra_script %}
+ 

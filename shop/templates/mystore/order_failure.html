@@ -1,0 +1,89 @@
+{% extends "mystore/base.html" %}
+{% load static %}
+
+{% block title %}Payment Failed - HOXOBIL{% endblock title %}
+
+{% block extra_head %}
+    <style>
+        /* Styles specific to order_failure.html */
+        .page-content-failure { /* Specific class for failure page content area */
+            padding: 2rem 1rem;
+            display: flex; /* For centering the container */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1; /* Takes available space */
+        }
+        .container-failure { /* Renamed to avoid conflict */
+            max-width: 700px;
+            /* margin: 2rem auto; Removed as page-content-failure handles centering */
+            background: #fff;
+            padding: 2rem;
+            border-radius: 0.75rem; /* Tailwind rounded-xl */
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .container-failure h1 {
+            color: #dc3545; /* Tailwind red-600 */
+            font-size: 2.25rem; /* Tailwind text-4xl */
+            line-height: 2.5rem;
+            font-weight: 700; /* Tailwind font-bold */
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        .container-failure p {
+            font-size: 1.125rem; /* Tailwind text-lg */
+            margin-bottom: 0.75rem; /* mb-3 */
+            color: #4b5563; /* Tailwind gray-600 */
+        }
+        .btn-retry {
+            display: inline-block;
+            margin-top: 1.5rem; /* mt-6 */
+            padding: 0.75rem 2rem; /* py-3 px-8 */
+            background-color: #2563eb; /* Tailwind blue-600 */
+            color: white;
+            text-decoration: none;
+            border-radius: 0.375rem; /* Tailwind rounded-md */
+            font-weight: 600; /* Tailwind font-semibold */
+            transition: background-color 0.3s;
+        }
+        .btn-retry:hover {
+            background-color: #1d4ed8; /* Tailwind blue-700 */
+        }
+        .btn-contact { /* Assuming this might be a link or styled differently */
+            color: #2563eb; /* Tailwind blue-600 */
+            text-decoration: underline;
+        }
+        .btn-contact:hover {
+            color: #1d4ed8; /* Tailwind blue-700 */
+        }
+
+        /* Media query adjustments from your original file, if still needed for this specific content */
+        @media (max-width: 768px) {
+            .container-failure h1 {
+                font-size: 2rem; /* Slightly smaller on mobile */
+            }
+            .container-failure p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+{% endblock extra_head %}
+
+{% block content %}
+<div class="page-content-failure">
+    {# Global messages will be displayed by base.html's messages-container-global #}
+    {# If you had specific page messages, they could go here. #}
+
+    <div class="container-failure">
+        <h1>⚠️ Payment Failed</h1>
+        <p>{{ error_message|default:"Unfortunately, we could not process your payment at this time." }}</p>
+        <p>Please try again or use a different payment method.</p>
+        <a href="{% url 'checkout' %}" class="btn-retry">Try Again</a>
+        <p style="margin-top:1.5rem;">If you continue to experience issues, please <a href="#" class="btn-contact">contact support</a>.</p> {# Consider adding a mailto: link or contact page URL #}
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_script %}
+    {# Add any page-specific JavaScript for order_failure.html here if needed #}
+{% endblock extra_script %}
