@@ -3,7 +3,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}HOXOBIL{% endblock title %}</title> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HOXOBIL{% endblock title %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,32 +16,31 @@
             flex-direction: column;
             min-height: 100vh; /* Ensures footer sticks to bottom */
         }
-        /* Minimal shared styles for Django messages, prefer Tailwind utility classes where possible */
-        .alert-message { /* This class is used if you manually create message divs without Tailwind */
+        /* Minimal shared styles for Django messages */
+        .alert-message { 
             padding: 0.75rem 1.25rem; 
             margin-bottom: 1rem; 
             border-radius: 0.375rem; /* rounded-md */
             font-weight: 500;
         }
-        .alert-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; } /* Tailwind red-100, red-800, red-200 */
-        .alert-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; } /* Tailwind green-100, green-800, green-200 */
-        .alert-info { background-color: #e0f2fe; color: #075985; border: 1px solid #bae6fd; } /* Tailwind sky-100, sky-800, sky-200 */
-        .alert-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; } /* Tailwind amber-100, amber-800, amber-200 */
+        .alert-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .alert-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .alert-info { background-color: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
+        .alert-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
 
-        /* Styles for the global messages container that appears at the top */
         .messages-container-global {
             padding: 0 1rem; 
             margin-top: 1rem; 
             list-style: none; 
             position: fixed;
-            top: 70px; /* Adjust if your header height changes significantly */
+            top: 80px; /* Adjusted slightly for potentially taller header */
             left: 50%;
             transform: translateX(-50%);
-            z-index: 1001; /* Ensure it's above other content */
-            width: auto; /* Auto width based on content */
-            max-width: 90%; /* Prevent it from being too wide on large screens */
+            z-index: 1001; 
+            width: auto; 
+            max-width: 90%;
         }
-        .messages-container-global .alert { /* Ensure alerts inside this specific container get animation */
+        .messages-container-global .alert {
              opacity: 0; 
              transform: translateY(-20px); 
              animation: fadeInSlideDown 0.5s forwards;
@@ -51,10 +51,10 @@
                 transform: translateY(0); 
             } 
         }
-        /* End of minimal shared styles */
     </style>
-    {% block extra_head %}{% endblock extra_head %} </head>
-<body class="bg-gray-100 text-gray-800">
+    {% block extra_head %}{% endblock extra_head %} {/* CORRECTLY PLACED INSIDE HEAD */}
+</head>
+<body class="bg-gray-100 text-gray-800"> {/* CORRECTED BODY TAG */}
 
     <header class="bg-black text-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,7 +62,8 @@
                 <div class="flex-shrink-0">
                     <a href="{% url 'home' %}" class="flex items-center">
                         <img class="h-12 w-auto sm:h-14" src="{% static 'images/logo/main_logo.png' %}" alt="HOXOBIL Logo"
-                             id="header-logo-image" onerror="handleLogoError(this);">
+                             id="header-logo-image" 
+                             onerror="handleLogoError(this);">
                         <span id="logo-text-fallback-header" style="display:none; color: #fff; font-size: 1.8rem; font-weight: bold; letter-spacing: 1px;">HOXO<span class="text-blue-500">BIL</span></span>
                     </a>
                 </div>
@@ -73,7 +74,8 @@
                     <a href="{% url 'competition_page' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'competition_page' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Competition</a>
                     
                     {% if user.is_authenticated %}
-                        <a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Account</a> <a href="{% url 'logout' %}" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Logout</a>
+                        <a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Account</a> {# TODO: Link to actual account page #}
+                        <a href="{% url 'logout' %}" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Logout</a>
                     {% else %}
                         <a href="{% url 'login' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'login' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Sign In</a>
                         <a href="{% url 'signup' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'signup' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Sign Up</a>
@@ -118,11 +120,12 @@
                 {% endif %}
                 <a href="{% url 'checkout' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'checkout' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Checkout</a>
                  <a href="{% url 'privacy_policy' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'privacy_policy' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Privacy Policy</a>
+                  <a href="{% url 'terms_of_service' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'terms_of_service' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Terms of Service</a>
             </div>
         </div>
     </header>
 
-    <main class="flex-grow">
+    <main class="flex-1"> {# Changed from flex-grow for Tailwind consistency #}
         <div class="messages-container-global" id="messages-container-dynamic-global">
             {% if messages %}
                 {% for message in messages %}
@@ -140,13 +143,24 @@
         <div class="container mx-auto px-6">
             <p>&copy; {% now "Y" %} HOXOBIL. All rights reserved. Unleashing Perfection Together.</p>
             <p class="mt-2">
-               <a href="{% url 'privacy_policy' %}" class="hover:text-white">Privacy Policy</a> | 
-<a href="{% url 'terms_of_service' %}" class="hover:text-white">Terms of Service</a>
+                <a href="{% url 'privacy_policy' %}" class="hover:text-white">Privacy Policy</a> | 
+                <a href="{% url 'terms_of_service' %}" class="hover:text-white">Terms of Service</a> 
             </p>
         </div>
     </footer>
 
 <script>
+// Placed the function definition in the global scope so it's available for img onerror
+function handleLogoError(imgElement) {
+    if (imgElement && imgElement instanceof HTMLElement) {
+        imgElement.style.display = 'none';
+    }
+    const fallbackTextElement = document.getElementById('logo-text-fallback-header');
+    if (fallbackTextElement && fallbackTextElement instanceof HTMLElement) {
+        fallbackTextElement.style.display = 'inline'; // Or 'block' if you prefer
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
@@ -155,13 +169,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const cartCountBadge = document.getElementById('cart-count-badge'); 
     const cartCountBadgeMobile = document.getElementById('cart-count-badge-mobile'); 
 
-    if (mobileMenuButton) {
+    if (mobileMenuButton && menuIconOpen && menuIconClosed && mobileMenu) { // Check all elements exist
         mobileMenuButton.addEventListener('click', function () {
-            const isExpanded = this.getAttribute('aria-expanded') === 'true' || false;
-            this.setAttribute('aria-expanded', !isExpanded);
-            mobileMenu.classList.toggle('hidden');
-            if (menuIconClosed) menuIconClosed.classList.toggle('hidden'); 
-            if (menuIconOpen) menuIconOpen.classList.toggle('hidden');   
+            const isCurrentlyHidden = mobileMenu.classList.contains('hidden');
+            mobileMenu.classList.toggle('hidden', !isCurrentlyHidden);
+            menuIconOpen.classList.toggle('hidden', isCurrentlyHidden);
+            menuIconClosed.classList.toggle('hidden', !isCurrentlyHidden);
+            this.setAttribute('aria-expanded', isCurrentlyHidden);
         });
     }
 
@@ -174,33 +188,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
     
-    // --- Improved Logo Error Handling ---
     const logoImageElement = document.getElementById('header-logo-image'); 
-    
-    function handleLogoError(imgElement) {
-        if (imgElement && imgElement instanceof HTMLElement) {
-            imgElement.style.display = 'none';
-        }
-        const fallbackTextElement = document.getElementById('logo-text-fallback-header');
-        if (fallbackTextElement && fallbackTextElement instanceof HTMLElement) {
-            fallbackTextElement.style.display = 'inline'; 
-        }
-    }
-
     if (logoImageElement) {
-        logoImageElement.onerror = function() {
-            // console.warn("Logo image failed to load. Displaying fallback text.");
-            handleLogoError(this);
-        };
+        // The onerror attribute on the img tag will call the globally defined handleLogoError
+        // Additional check for already broken images on page load
         if (!logoImageElement.complete || (typeof logoImageElement.naturalWidth !== "undefined" && logoImageElement.naturalWidth === 0)) {
             if (logoImageElement.src && logoImageElement.src !== window.location.href) { 
-                 // console.warn("Logo image appears broken on load. Displaying fallback text.");
-                 handleLogoError(logoImageElement);
+                 if (typeof handleLogoError === 'function') { 
+                    handleLogoError(logoImageElement);
+                 }
             }
         }
     }
-    // --- End Improved Logo Error Handling ---
-
 
     const globalMessagesContainer = document.getElementById('messages-container-dynamic-global');
     if (globalMessagesContainer) {
@@ -224,7 +223,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
     
-    // Ensure fadeOut animation style is present for dynamically added messages (if not already in a child template's extra_head)
     if (!document.querySelector('style[data-animation="fade-out"]')) {
         const styleSheetFadeOut = document.createElement("style");
         styleSheetFadeOut.dataset.animation = "fade-out"; 
@@ -232,6 +230,32 @@ document.addEventListener('DOMContentLoaded', function () {
         styleSheetFadeOut.innerText = "@keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }";
         document.head.appendChild(styleSheetFadeOut);
     }
+
+    // Function to be called by child templates if they want to display a global message
+    window.displayGlobalMessageInBase = function(message, type = 'info') {
+        if (!globalMessagesContainer) return;
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.setAttribute('role', 'alert');
+        alertDiv.textContent = message;
+        
+        // Clear previous dynamic messages before adding a new one
+        const dynamicMessages = globalMessagesContainer.querySelectorAll('.alert[data-dynamic="true"]');
+        dynamicMessages.forEach(dm => dm.remove());
+
+        alertDiv.dataset.dynamic = "true"; // Mark as a dynamic message
+        globalMessagesContainer.appendChild(alertDiv);
+
+        setTimeout(() => {
+            if (alertDiv.parentNode) { 
+                alertDiv.style.animation = 'fadeOut 0.5s forwards';
+                setTimeout(() => {
+                   if (alertDiv.parentNode) alertDiv.remove();
+                }, 500);
+            }
+        }, 3000); // Auto-clear dynamically added messages
+    };
+
 });
 </script>
 {% block extra_script %}{% endblock extra_script %}

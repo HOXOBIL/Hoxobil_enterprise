@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse, Http404
 from django.urls import reverse 
-from .models import Product, Order, OrderItem, WinningCode, CompetitionAttempt, SiteEvent 
+from .models import Product, Order, OrderItem, WinningCode, CompetitionAttempt, SiteEvent, UserProfile 
 import requests 
 import os
 import json
@@ -11,28 +11,24 @@ from django.conf import settings
 from decimal import Decimal, ROUND_HALF_UP 
 from django.utils import timezone 
 from django.views.decorators.http import require_POST 
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm # UserCreationForm is replaced by CustomUserCreationForm
 from django.contrib.auth import login, logout, authenticate, get_user_model 
 from django.contrib.auth.decorators import login_required 
 from collections import defaultdict
-from django.contrib.auth.views import redirect_to_login 
+from django.contrib.auth.views import redirect_to_login
+from .forms import CustomUserCreationForm, EmailAuthenticationForm # Import your custom forms
+from .signals import process_successful_referral # Assuming this is where you defined it
 
 # --- Configuration ---
 PRINTIFY_SHOP_ID = os.getenv('PRINTIFY_SHOP_ID', '18789476') 
 PRINTIFY_API_TOKEN = os.getenv("PRINTIFY_API_TOKEN")
-
 PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY') 
 PAYSTACK_PUBLIC_KEY = os.getenv('PAYSTACK_PUBLIC_KEY') 
 
-if not PRINTIFY_API_TOKEN:
-    print("🔴 CRITICAL WARNING: PRINTIFY_API_TOKEN is not set in environment variables.")
-if not PAYSTACK_SECRET_KEY:
-    print("🔴 CRITICAL WARNING: PAYSTACK_SECRET_KEY is not set. Payment will fail.")
+if not PRINTIFY_API_TOKEN: print("🔴 CRITICAL WARNING: PRINTIFY_API_TOKEN is not set.")
+if not PAYSTACK_SECRET_KEY: print("🔴 CRITICAL WARNING: PAYSTACK_SECRET_KEY is not set.")
 
-HEADERS = { 
-    'Authorization': f'Bearer {PRINTIFY_API_TOKEN}',
-    'Content-Type': 'application/json',
-}
+HEADERS = { 'Authorization': f'Bearer {PRINTIFY_API_TOKEN}', 'Content-Type': 'application/json'}
 USD_TO_NGN_RATE = Decimal('1607.00') 
 API_BASE_URL = "https://api.printify.com/v1"
 PAYSTACK_API_BASE_URL = "https://api.paystack.co"
@@ -172,7 +168,7 @@ def view_cart(request):
     return render(request, 'mystore/cart.html', {'cart_items':cart_items_processed,'cart_total_price':cart_total_price})
 
 @login_required
-def remove_from_cart(request, cart_key): 
+def remove_from_cart(request, cart_key):
     cart = get_cart(request)
     if cart_key in cart: title = cart[cart_key].get('variant_title',cart[cart_key].get('title','Item')); del cart[cart_key]; save_cart(request,cart); messages.success(request,f"Removed {title} from cart.")
     else: messages.error(request,"Item not found in cart. Could not remove.")
@@ -241,8 +237,6 @@ def paystack_callback(request):
         return redirect('checkout') 
     
     session_reference = request.session.get('paystack_reference')
-    # It's good practice to ensure the reference from Paystack matches one you initiated.
-    # However, the primary verification is calling Paystack's verify endpoint.
     if session_reference != reference:
          print(f"⚠️ Callback: Reference mismatch or direct access. Session: '{session_reference}', Paystack: '{reference}'. Proceeding with Paystack's reference for verification.")
     
@@ -267,29 +261,30 @@ def paystack_callback(request):
             
             if not order_details_session: 
                 messages.error(request, "Order details lost. Contact support with reference: " + reference); 
-                print(f"❌ Callback: 'order_details_for_completion' missing for ref {reference}."); 
-                return redirect('order_failure', error_message="Order details lost after payment.") 
+                print(f"❌ Callback: 'order_details_for_completion' missing from session for ref {reference}."); 
+                return redirect(reverse('order_failure_specific', kwargs={'error_message': "Order details lost after payment."}))
             
             cart_snapshot = order_details_session.pop('cart_snapshot', {}) 
             
-            # --- CORRECTED USER ASSIGNMENT LOGIC ---
             user_for_order = None
             user_id_from_session = order_details_session.pop('user_id', None) 
+            
+            # *** CORRECTED INDENTATION AND LOGIC FOR USER ASSIGNMENT ***
             if user_id_from_session: 
                 User = get_user_model() 
                 try:
                     user_for_order = User.objects.get(id=user_id_from_session)
                 except User.DoesNotExist:
                     print(f"⚠️ User with ID {user_id_from_session} not found for order {reference}. Order will be created without a user link.")
-                    # If user_id_from_session was present but user not found,
-                    # check current request.user as a fallback if they are now authenticated.
+                    # Fallback to current request.user if session user_id is invalid but user is logged in now
                     if request.user.is_authenticated:
                         user_for_order = request.user
-                        print(f"  Using current request.user: {request.user.username} as user_for_order (session user ID not found).")
-            elif request.user.is_authenticated: # Only if user_id_from_session was NOT present
+                        print(f"  Using current request.user: {user_for_order.email} as user_for_order (session user ID {user_id_from_session} not found).") # Use .email for CustomUser
+            elif request.user.is_authenticated: # This elif corresponds to the outer "if user_id_from_session:"
                 user_for_order = request.user
-                print(f"  No user_id in session, using current request.user: {request.user.username} as user_for_order.")
-            # --- END CORRECTED USER ASSIGNMENT LOGIC ---
+                print(f"  No user_id in session, using current request.user: {user_for_order.email} as user_for_order.") # Use .email
+            # *** END CORRECTION ***
+            
 
             if Order.objects.filter(paystack_reference=reference).exists():
                 messages.info(request, "Payment already processed."); 
@@ -311,7 +306,7 @@ def paystack_callback(request):
                     'paid':True, 'paystack_reference':reference
                 }
                 if user_for_order: 
-                    order_data['user'] = user_for_order # Assign the User object instance
+                    order_data['user'] = user_for_order 
                 
                 order = Order.objects.create(**order_data)
                 print(f"📝 Order {order.id} created.")
@@ -358,63 +353,101 @@ def order_failure(request, error_message=None):
     context = {'error_message': error_message or "Your payment could not be processed."}
     return render(request, 'mystore/order_failure.html', context)
 
-def competition_page(request): 
+def competition_page(request):
     prizes_left = WinningCode.objects.filter(is_claimed=False).count()
     launch_event = SiteEvent.objects.filter(event_name='SITE_LAUNCH', is_active=True).order_by('-event_datetime').first()
-    launch_datetime_iso = None; launch_notes = None
-    if launch_event: launch_datetime_iso = launch_event.event_datetime.isoformat(); launch_notes = launch_event.notes 
-    context = { 'prizes_left': prizes_left, 'launch_datetime_iso': launch_datetime_iso, 'launch_notes': launch_notes }
+    launch_datetime_iso = None; launch_notes = None; user_profile = None
+    if launch_event: 
+        launch_datetime_iso = launch_event.event_datetime.isoformat()
+        launch_notes = launch_event.notes 
+    if request.user.is_authenticated:
+        try: 
+            user_profile = request.user.profile
+        except UserProfile.DoesNotExist: 
+            user_profile = UserProfile.objects.create(user=request.user)
+            print(f"UserProfile created on-the-fly for {request.user.email} in competition_page view.")
+        except Exception as e: 
+            print(f"Error accessing user.profile in competition_page: {e}")
+            user_profile = None
+    context = { 'prizes_left': prizes_left, 'launch_datetime_iso': launch_datetime_iso, 'launch_notes': launch_notes, 'user_profile': user_profile }
     return render(request, 'mystore/competition.html', context)
 
+@login_required 
 @require_POST 
-def submit_competition_code(request): 
+def submit_competition_code(request):
     submitted_code = request.POST.get('code', '').strip()
     if not submitted_code or not submitted_code.isdigit() or len(submitted_code) != 6: return JsonResponse({'status': 'error', 'message': 'Invalid code format.'})
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR'); ip = x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
     session_key = request.session.session_key; 
     if not session_key: request.session.save(); session_key = request.session.session_key
-    attempt = CompetitionAttempt.objects.create(session_key=session_key, ip_address=ip, submitted_code=submitted_code)
+    attempt = CompetitionAttempt.objects.create(user=request.user, ip_address=ip, submitted_code=submitted_code, session_key=session_key)
     unclaimed_prizes_count = WinningCode.objects.filter(is_claimed=False).count()
     if unclaimed_prizes_count == 0: return JsonResponse({'status': 'all_claimed', 'message': 'Sorry, all prizes have been claimed!'})
     try:
         winning_code_entry = WinningCode.objects.get(code=submitted_code)
         if winning_code_entry.is_claimed:
             attempt.winning_code_matched = winning_code_entry; attempt.save()
-            return JsonResponse({'status': 'claimed', 'message': f"Code '{submitted_code}' already claimed. Try another!", 'prizes_left': unclaimed_prizes_count })
+            return JsonResponse({'status': 'claimed', 'message': f"Oops! Code '{submitted_code}' already claimed by {winning_code_entry.claimed_by_user.email if winning_code_entry.claimed_by_user else 'someone'}.", 'prizes_left': unclaimed_prizes_count })
         else:
-            winning_code_entry.is_claimed = True; winning_code_entry.claimed_by_identifier = session_key; winning_code_entry.claimed_at = timezone.now(); winning_code_entry.save()
+            winning_code_entry.is_claimed = True; winning_code_entry.claimed_by_user = request.user; winning_code_entry.claimed_at = timezone.now(); winning_code_entry.save()
             attempt.is_winner = True; attempt.winning_code_matched = winning_code_entry; attempt.save()
             prizes_left_now = WinningCode.objects.filter(is_claimed=False).count()
-            return JsonResponse({'status': 'success', 'message': f"🎉 Congratulations! '{submitted_code}' is a winning code! You've won: {winning_code_entry.prize_description}", 'prize': winning_code_entry.prize_description, 'prizes_left': prizes_left_now })
+            return JsonResponse({'status': 'success', 'message': f"🎉 Congrats, {request.user.email}! '{submitted_code}' is a winning code! You've won: {winning_code_entry.prize_description}", 'prize': winning_code_entry.prize_description, 'prizes_left': prizes_left_now })
     except WinningCode.DoesNotExist:
         attempt.is_winner = False; attempt.save()
         return JsonResponse({'status': 'failure', 'message': f"Sorry, '{submitted_code}' is not a winning code. Keep trying!", 'prizes_left': unclaimed_prizes_count })
     except Exception as e: print(f"Error in submit_competition_code: {e}"); return JsonResponse({'status': 'error', 'message': 'An unexpected error occurred.'})
 
-def signup_view(request): 
+def signup_view(request):
     if request.user.is_authenticated: return redirect('home') 
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid(): user = form.save(); login(request, user); messages.success(request, "Registration successful!"); return redirect('home') 
+        form = CustomUserCreationForm(request.POST) 
+        if form.is_valid():
+            user = form.save()
+            referral_code_input = form.cleaned_data.get('referral_code', '').strip()
+            if referral_code_input:
+                try:
+                    referrer_profile = UserProfile.objects.get(referral_code__iexact=referral_code_input) 
+                    new_user_profile, created = UserProfile.objects.get_or_create(user=user)
+                    if created: print(f"UserProfile created on demand for {user.email} during signup referral processing.")
+                    new_user_profile.referred_by = referrer_profile.user
+                    new_user_profile.save(update_fields=['referred_by', 'updated_at'])
+                    process_successful_referral(referrer_profile) # Call the function
+                    messages.success(request, f"Account created! You were referred by {referrer_profile.user.email}.")
+                except UserProfile.DoesNotExist: messages.warning(request, "Invalid referral code, but account created.")
+                except Exception as e: print(f"Error processing referral: {e}"); messages.error(request, "Account created, error with referral.")
+            login(request, user) 
+            if not messages.get_messages(request): messages.success(request, "Registration successful!")
+            return redirect('home') 
         else:
-            for field, errors in form.errors.items():
-                for error in errors: messages.error(request, f"{form.fields[field].label if field != '__all__' else ''}{error}")
-    else: form = UserCreationForm()
+            # Errors are now handled by the template via {{ form.errors }} or {{ field.errors }}
+            # You can still add a general message if you like, but it might be redundant.
+            # messages.error(request, "Please correct the errors below.")
+            pass
+    else: 
+        form = CustomUserCreationForm() 
     return render(request, 'mystore/signup.html', {'form': form})
 
 def login_view(request): 
     if request.user.is_authenticated: return redirect('home') 
-    next_url = request.POST.get('next') or request.GET.get('next') or reverse('home')
+    next_url_param = request.GET.get('next') 
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        form = EmailAuthenticationForm(request, data=request.POST) 
         if form.is_valid():
-            username = form.cleaned_data.get('username'); password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None: login(request, user); messages.info(request, f"Welcome back, {username}!"); return redirect(next_url)
-            else: messages.error(request,"Invalid username or password.")
-        else: messages.error(request,"Invalid username or password.") 
-    else: form = AuthenticationForm()
-    return render(request, 'mystore/login.html', {'form': form, 'next': request.GET.get('next', '')})
+            email = form.cleaned_data.get('username') 
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=email, password=password) 
+            if user is not None: 
+                login(request, user)
+                messages.info(request, f"Welcome back, {user.first_name or user.email}!")
+                next_redirect = request.POST.get('next') or request.GET.get('next') or reverse('home')
+                return redirect(next_redirect)
+            else: messages.error(request,"Invalid email or password.")
+        else: 
+            messages.error(request,"Invalid email or password.") 
+    else: 
+        form = EmailAuthenticationForm()
+    return render(request, 'mystore/login.html', {'form': form, 'next': next_url_param or ''})
 
 @login_required 
 def logout_view(request): 
@@ -423,8 +456,7 @@ def logout_view(request):
 def privacy_policy_view(request): return render(request, 'mystore/privacy_policy.html')
 def terms_of_service_view(request): return render(request, 'mystore/terms_of_service.html')
 
-# --- Sync Views ---
-def sync_products_to_db(products_from_api):
+def sync_products_to_db(products_from_api): # ... (your existing sync_products_to_db) ...
     created_count = 0; updated_count = 0
     if not products_from_api: return 0, 0
     for pd in products_from_api:
@@ -452,23 +484,27 @@ def sync_products_to_db(products_from_api):
             else: updated_count += 1
         except Exception as e: print(f"DB Error syncing product {pid}: {e}")
     return created_count, updated_count
-
-def sync_products_view(request):
+def sync_products_view(request): # ... (your existing sync_products_view) ...
     if not PRINTIFY_API_TOKEN or not PRINTIFY_SHOP_ID:
         messages.error(request, "API token or Shop ID not configured for sync.") 
         return JsonResponse({'status': 'error', 'message': 'API token or Shop ID not configured.'})
-    api_url = f"{API_BASE_URL}/shops/{PRINTIFY_SHOP_ID}/products.json"
-    try:
-        response = requests.get(api_url, headers=HEADERS, timeout=15); response.raise_for_status()
-        products_from_api_sync = response.json().get('data', []) 
-    except Exception as e:
-        messages.error(request, f'Failed to fetch products for sync: {str(e)}')
-        return JsonResponse({'status': 'error', 'message': f'Failed to fetch products for sync: {str(e)}'})
-    if not products_from_api_sync:
-        messages.info(request, "No products found in Printify shop to sync.")
-        return JsonResponse({'status': 'info', 'message': 'No products found in Printify shop to sync.'})
-    created, updated = sync_products_to_db(products_from_api_sync) 
-    msg = f"Sync complete. Created: {created}, Updated: {updated}."
-    messages.success(request, msg) 
+    all_products_from_api = []
+    page = 1
+    while True:
+        api_url = f"{API_BASE_URL}/shops/{PRINTIFY_SHOP_ID}/products.json?page={page}&limit=100" 
+        print(f"  Fetching page {page} from {api_url}")
+        try:
+            response = requests.get(api_url, headers=HEADERS, timeout=20); response.raise_for_status()
+            data = response.json(); current_page_products = data.get('data', [])
+            if not current_page_products: break 
+            all_products_from_api.extend(current_page_products)
+            if data.get('current_page') == data.get('last_page') or not data.get('next_page_url'): break
+            page += 1
+        except Exception as e: error_msg = f'Failed to fetch products for sync (page {page}): {str(e)}'; print(f"❌ {error_msg}"); messages.error(request, error_msg); return JsonResponse({'status': 'error', 'message': error_msg})
+    if not all_products_from_api: messages.info(request, "No products found in Printify shop to sync."); return JsonResponse({'status': 'info', 'message': 'No products found in Printify shop to sync.'})
+    print(f"  Total products fetched from Printify API: {len(all_products_from_api)}")
+    created, updated = sync_products_to_db(all_products_from_api) 
+    msg = f"Synchronization complete. Products created: {created}, Products updated: {updated}."
+    print(f"✅ {msg}"); messages.success(request, msg) 
     return JsonResponse({'status': 'success', 'message': msg, 'created': created, 'updated': updated})
 

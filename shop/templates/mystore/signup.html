@@ -1,62 +1,177 @@
 {% extends "mystore/base.html" %}
 {% load static %}
 
-{% block title %}Create Account - HOXOBIL{% endblock title %}
+{% block title %}Join HOXOBIL - Create Your Account{% endblock title %}
 
 {% block extra_head %}
     <style>
-        /* Styles specific to the signup form if needed, beyond Tailwind utilities */
-        /* .form-input and .btn-primary styles are now applied directly with Tailwind classes */
-        /* Alert message styles are in base.html, but you can override or add here if needed */
+        /* Styles specific to the signup page alternative design */
+        .signup-container-alt {
+            min-height: calc(100vh - 10rem); /* Adjust based on header/footer height if necessary */
+        }
+        .branding-side {
+            background-color: #111827; /* Tailwind gray-900 */
+            background-size: cover;
+            background-position: center;
+        }
+        .form-side {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* Password strength/validation indicator styling */
+        .password-strength-indicators {
+            margin-top: 0.5rem;
+            font-size: 0.875rem; /* text-sm */
+        }
+        .password-strength-indicators div {
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+        }
+        .password-strength-indicators .indicator-icon {
+            margin-right: 0.5rem;
+            width: 1rem; /* w-4 */
+            height: 1rem; /* h-4 */
+            line-height: 1rem; /* Ensure icon is centered if using text */
+        }
+        .indicator-valid { color: #10b981; /* Tailwind green-500 */ }
+        .indicator-invalid { color: #ef4444; /* Tailwind red-500 */ }
+        .indicator-neutral { color: #6b7280; /* Tailwind gray-500 */ }
     </style>
 {% endblock extra_head %}
 
 {% block content %}
-<div class="py-8 md:py-12"> {# Added padding for the content area #}
-    <div class="max-w-md mx-auto bg-white p-8 md:p-10 rounded-xl shadow-xl">
-        <h1 class="text-3xl font-bold text-center text-gray-900 mb-8">Create Your HOXOBIL Account</h1>
+<div class="signup-container-alt md:flex">
+    {# Left Side - Branding/Image #}
+    <div class="branding-side hidden md:flex md:w-1/2  flex-col items-center justify-center p-12 text-white text-center">
+        <a href="{% url 'home' %}" class="mb-8">
+            <img src="{% static 'images/logo/main_logo.png' %}" alt="HOXOBIL Logo" class="h-16 w-auto sm:h-20 mx-auto"
+                 onerror="this.style.display='none'; document.getElementById('logo-text-fallback-signup-branding').style.display='block';">
+            <span id="logo-text-fallback-signup-branding" style="display:none; font-size: 2.5rem; font-weight: bold; letter-spacing: 1px;">HOXO<span class="text-blue-500">BIL</span></span>
+        </a>
+        <h2 class="text-3xl lg:text-4xl font-bold mb-4">Unleash Perfection.</h2>
+        <p class="text-lg lg:text-xl text-gray-300">Join the HOXOBIL movement and redefine your style. Exclusive access, latest drops, and more await.</p>
+    </div>
 
-        {# Messages will be displayed by the global messages container in base.html #}
-        {# If you had page-specific message placement, it would go here, but global is often better #}
+    {# Right Side - Form #}
+    <div class="form-side w-full md:w-1/2 bg-gray-100 p-6 sm:p-8 md:p-12 flex items-center justify-center">
+        <div class="max-w-md w-full space-y-8 bg-white p-8 md:p-10 rounded-xl shadow-2xl">
+            <div>
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                    Create your HOXOBIL account
+                </h2>
+                <p class="mt-2 text-center text-sm text-gray-600">
+                    Or <a href="{% url 'login' %}" class="font-medium text-blue-600 hover:text-blue-500">
+                        sign in if you already have an account
+                    </a>
+                </p>
+            </div>
 
-        <form method="post" action="{% url 'signup' %}">
-            {% csrf_token %}
-            
-            {% for field in form %}
+            {% if form.non_field_errors %}
                 <div class="mb-4">
-                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
-                    <input type="{{ field.field.widget.input_type }}" 
-                           name="{{ field.name }}" 
-                           id="{{ field.id_for_label }}"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 {% if field.errors %}border-red-500{% endif %}"
-                           {% if field.field.required %}required{% endif %}
-                           value="{{ field.value|default:'' }}">
-                    {% if field.help_text %}
-                        <p class="text-xs text-gray-500 mt-1">{{ field.help_text|safe }}</p>
-                    {% endif %}
-                    {% for error in field.errors %}
-                        <p class="text-xs text-red-600 mt-1">{{ error }}</p>
+                    {% for error in form.non_field_errors %}
+                        <div class="alert-message alert-error" role="alert">
+                            {{ error }}
+                        </div>
                     {% endfor %}
                 </div>
-            {% endfor %}
+            {% endif %}
 
-            <div class="mt-8">
-                <button type="submit" 
-                        class="w-full bg-black hover:bg-gray-800 text-white font-semibold py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black text-lg">
-                    Create Account
-                </button>
-            </div>
-        </form>
-        <p class="mt-6 text-center text-sm text-gray-600">
-            Already have an account? 
-            <a href="{% url 'login' %}" class="font-medium text-blue-600 hover:text-blue-500">
-                Sign In
-            </a>
-        </p>
+            <form class="mt-8 space-y-6" method="post" action="{% url 'signup' %}">
+                {% csrf_token %}
+                <input type="hidden" name="remember" value="true">
+                <div class="rounded-md shadow-sm -space-y-px">
+                    {% for field in form %}
+                        <div class="mb-4">
+                            <label for="{{ field.id_for_label }}" class="sr-only">{{ field.label }}</label>
+                            <input id="{{ field.id_for_label }}" 
+                                   name="{{ field.name }}" 
+                                   type="{{ field.field.widget.input_type }}" 
+                                   autocomplete="{{ field.name }}" 
+                                   {% if field.field.required %}required{% endif %}
+                                   class="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm {% if field.errors %}border-red-500{% endif %}"
+                                   placeholder="{{ field.label }}"
+                                   value="{{ field.value|default:'' }}">
+                            
+                            {# Conditional display for help text and errors #}
+                            {% if field.name == 'password2' %}
+                                {# For password confirmation, we might not need help text #}
+                            {% elif field.name == 'referral_code' %}
+                                <p class="text-xs text-gray-500 mt-1 px-1">If someone referred you, enter their code here.</p>
+                            {% elif field.field.help_text and 'password' not in field.name %}
+                                <p class="text-xs text-gray-500 mt-1 px-1">{{ field.help_text|safe }}</p>
+                            {% endif %}
+
+                            {% for error in field.errors %}
+                                <p class="text-xs text-red-600 mt-1 px-1">{{ error }}</p>
+                            {% endfor %}
+
+                            {% if field.name == 'password1' %}
+                            <div class="password-strength-indicators" id="password-feedback-{{ field.id_for_label }}">
+                                <div id="length-indicator"><span class="indicator-icon indicator-neutral">●</span> Must be at least 8 characters.</div>
+                                <div id="uppercase-indicator"><span class="indicator-icon indicator-neutral">●</span> At least 1 uppercase letter.</div>
+                                <div id="numeric-indicator"><span class="indicator-icon indicator-neutral">●</span> Not entirely numeric.</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    {# *** Manually added Referral Code Field REMOVED from here *** #}
+                    {# It will be rendered by the loop above because it's part of CustomUserCreationForm #}
+                </div>
+
+                <div>
+                    <button type="submit"
+                            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900">
+                        Create Account
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock content %}
 
 {% block extra_script %}
-    {# Add any page-specific JavaScript for signup.html here if needed #}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordField = document.getElementById('id_password1'); 
+        
+        const lengthIndicator = document.getElementById('length-indicator')?.querySelector('.indicator-icon');
+        const uppercaseIndicator = document.getElementById('uppercase-indicator')?.querySelector('.indicator-icon');
+        const numericIndicator = document.getElementById('numeric-indicator')?.querySelector('.indicator-icon');
+
+        if (passwordField) {
+            passwordField.addEventListener('input', function() {
+                const password = this.value;
+                let isValidOverall = true; 
+
+                // Length Check
+                if (password.length >= 8) {
+                    if (lengthIndicator) { lengthIndicator.textContent = '✔'; lengthIndicator.className = 'indicator-icon indicator-valid'; }
+                } else {
+                    if (lengthIndicator) { lengthIndicator.textContent = '✖'; lengthIndicator.className = 'indicator-icon indicator-invalid'; }
+                    isValidOverall = false;
+                }
+
+                // Uppercase Check
+                if (/[A-Z]/.test(password)) {
+                    if (uppercaseIndicator) { uppercaseIndicator.textContent = '✔'; uppercaseIndicator.className = 'indicator-icon indicator-valid'; }
+                } else {
+                    if (uppercaseIndicator) { uppercaseIndicator.textContent = '✖'; uppercaseIndicator.className = 'indicator-icon indicator-invalid'; }
+                    isValidOverall = false;
+                }
+
+                // Numeric Check (Not *entirely* numeric)
+                if (!/^\d+$/.test(password) || password.length === 0) { 
+                    if (numericIndicator) { numericIndicator.textContent = '✔'; numericIndicator.className = 'indicator-icon indicator-valid'; }
+                } else {
+                    if (numericIndicator) { numericIndicator.textContent = '✖'; numericIndicator.className = 'indicator-icon indicator-invalid'; }
+                    isValidOverall = false;
+                }
+            });
+        }
+    });
+    </script>
 {% endblock extra_script %}
