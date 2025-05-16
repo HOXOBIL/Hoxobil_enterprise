@@ -85,9 +85,9 @@ WSGI_APPLICATION = 'hoxobil.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}",
-        conn_max_age=600, 
-        conn_health_checks=True,
+        default='postgresql://hoxobiluser:bjAU3tqMQTFXs2GLmRy5Uj8MNvlMt7aV@dpg-d0ilmtidbo4c738l1db0-a.oregon-postgres.render.com/hoxobildb',
+        conn_max_age=600,  # optional, keeps connections alive longer for performance
+        ssl_require=True
     )
 }
 
