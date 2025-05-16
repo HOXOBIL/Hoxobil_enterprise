@@ -170,7 +170,7 @@
             {% if user.is_authenticated %}
                 <p class="text-gray-600 mb-8 max-w-xl mx-auto">
                     We've hidden 3 secret 6-digit codes. Enter your guess below. If you find one, you win!
-                    Good luck, {{ user.username }}! (Max 20 tries before a short break)
+                    Good luck, {{ user.username }}! (Max 50 tries before a short break)
                 </p>
                 <div class="max-w-md mx-auto bg-gray-50 p-8 rounded-xl shadow-lg">
                     <form id="competition-form" novalidate> 
@@ -192,7 +192,7 @@
                     {# Referral Information Section - Corrected #}
                     {% if user_profile and user_profile.referral_code %}
                     <div class="referral-section">
-                        <h4>Your Referral Status</h4>
+                        <h4>YOUR REFERRAL STATUS</h4>
                         <p>Share your unique referral code: <strong class="referral-code">{{ user_profile.referral_code }}</strong></p>
                         <p>People you've referred: <strong>{{ user_profile.referral_count }} / 30</strong></p>
                         {% if user_profile.unlocked_first_digit %}
