@@ -8,10 +8,44 @@
     <style>
         /* Styles specific to competition.html */
         .hero-bg-competition {
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-            background-size: cover;
+            /* Enhanced gradient with a subtle animation */
+            background: linear-gradient(135deg, #0a0a0a 0%, #1f1f1f 50%, #0a0a0a 100%);
+            background-size: 400% 400%; /* Required for gradient animation */
+            animation: gradientBG 20s ease infinite;
             background-position: center;
+            overflow: hidden; /* Prevent scrollbars from pseudo-elements */
+            position: relative; /* For pseudo-elements */
         }
+
+        /* Subtle animated particles/stars in the hero background */
+        .hero-bg-competition::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(255,215,0,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 80% 30%, rgba(255,215,0,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 30% 70%, rgba(255,255,255,0.05) 1px, transparent 1px),
+                radial-gradient(circle at 70% 80%, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 50px 50px, 70px 70px, 60px 60px, 80px 80px;
+            animation: starsMove 60s linear infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes starsMove {
+            0% { background-position: 0 0, 0 0, 0 0, 0 0; }
+            100% { background-position: 100px 200px, -150px 100px, 200px -50px, -50px -150px; }
+        }
+
         .input-code::-webkit-outer-spin-button,
         .input-code::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -28,6 +62,7 @@
             font-weight: 700; 
             margin-bottom: 3rem; 
             color: #1f2937; 
+            animation: fadeInUp 0.8s ease-out forwards;
         }
         .team-category-title-competition {
             font-size: 1.8rem; 
@@ -36,6 +71,7 @@
             margin-top: 3rem; 
             margin-bottom: 1.5rem; 
             text-align: center; 
+            animation: fadeInUp 0.8s ease-out 0.2s forwards; /* Staggered animation */
         }
         .team-category-title-competition:first-of-type {
             margin-top: 0; 
@@ -51,14 +87,29 @@
         .team-member-competition { 
             background-color: #ffffff; 
             padding: 1.5rem; 
-            border-radius: 0.5rem; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+            border-radius: 0.75rem; /* Slightly more rounded */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
             text-align: center; 
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0; /* For entrance animation */
+            transform: translateY(20px); /* For entrance animation */
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        /* Staggered animation for team members */
+        .team-member-competition:nth-child(1) { animation-delay: 0.3s; }
+        .team-member-competition:nth-child(2) { animation-delay: 0.4s; }
+        .team-member-competition:nth-child(3) { animation-delay: 0.5s; }
+        .team-member-competition:nth-child(4) { animation-delay: 0.6s; }
+        /* Add more if needed */
+
+        .team-member-competition:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         .team-member-competition h3 {
             font-size: 1.25rem; 
             font-weight: 600; 
-            color: #1f2937; 
+            color: #111827; /* Darker for better contrast */
             margin-bottom: 0.25rem; 
         }
         .team-member-competition .role { 
@@ -68,128 +119,218 @@
             font-size: 0.95rem; 
         }
         
+        /* Enhanced Button Style */
         .btn-primary-competition { 
             background-color: #1f2937; 
             color: white;
-            transition: background-color 0.3s ease;
+            padding: 0.75rem 1.5rem; /* Consistent padding */
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .btn-primary-competition:hover {
             background-color: #374151; 
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(0,0,0,0.1), 0 3px 6px rgba(0,0,0,0.08);
         }
+        .btn-primary-competition:active {
+            transform: translateY(0px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
         .prize-claimed {
             text-decoration: line-through;
             color: #9ca3af; 
         }
-        .countdown-timer-container { margin-top: 2rem; margin-bottom: 2.5rem; }
+        .countdown-timer-container { margin-top: 2rem; margin-bottom: 2.5rem; animation: fadeIn 1s ease-out 0.5s forwards; opacity:0; }
         .countdown-timer { display: flex; justify-content: center; gap: 1rem; text-align: center; }
-        .countdown-timer > div { background-color: rgba(255, 255, 255, 0.1); padding: 1rem 1.5rem; border-radius: 0.5rem; min-width: 80px; }
-        .countdown-timer .time-value { font-size: 2.5rem; font-weight: 700; line-height: 1; color: #ffffff; }
-        .countdown-timer .time-label { font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; color: #d1d5db; margin-top: 0.25rem; }
-        .launched-message { font-size: 2rem; font-weight: bold; color: #22c55e; }
+        .countdown-timer > div { 
+            background-color: rgba(255, 255, 255, 0.08); /* Slightly more subtle */
+            padding: 1rem 1.5rem; 
+            border-radius: 0.75rem; /* More rounded */
+            min-width: 80px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+        .countdown-timer > div:hover {
+            transform: scale(1.05);
+        }
+        .countdown-timer .time-value { 
+            font-size: 2.5rem; 
+            font-weight: 700; 
+            line-height: 1; 
+            color: #facc15; /* Gold color for timer */
+            text-shadow: 0 0 10px rgba(250, 204, 21, 0.5); /* Subtle glow */
+        }
+        .countdown-timer .time-label { font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; color: #e5e7eb; margin-top: 0.25rem; }
+        .launched-message { font-size: 2rem; font-weight: bold; color: #22c55e; animation: pulse 2s infinite; }
         #cooldown-timer-display { margin-top: 1rem; font-size: 1.1rem; font-weight: 500; color: #dd6b20; }
 
-        /* Referral Section Styles */
+        /* Referral Section Styles - Enhanced */
         .referral-section {
             margin-top: 2.5rem; 
-            padding: 1.5rem; 
-            background-color: #eef2ff; 
-            border: 1px solid #c7d2fe; 
-            border-radius: 0.5rem; 
+            padding: 2rem; /* Increased padding */
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); /* Light blue gradient */
+            border: 1px solid #bae6fd; 
+            border-radius: 0.75rem; /* More rounded */
             text-align: left;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            animation: fadeInUp 0.8s ease-out 0.4s forwards;
         }
         .referral-section h4 {
-            font-size: 1.25rem; 
-            font-weight: 600; 
-            color: #3730a3; 
-            margin-bottom: 0.75rem; 
+            font-size: 1.35rem; /* Slightly larger */
+            font-weight: 700; /* Bolder */
+            color: #075985; /* Deeper blue */
+            margin-bottom: 1rem; 
         }
         .referral-section p {
-            font-size: 0.95rem; 
-            color: #4338ca; 
-            margin-bottom: 0.5rem; 
+            font-size: 1rem; 
+            color: #0c4a6e; 
+            margin-bottom: 0.75rem; 
         }
         .referral-section strong {
             font-weight: 600;
-            color: #312e81; 
+            color: #0369a1; 
         }
         .referral-code {
             background-color: #ffffff;
-            border: 1px dashed #a5b4fc; 
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            font-family: monospace;
-            font-size: 1.1rem;
-            color: #312e81;
-            display: inline-block;
-            margin-top: 0.25rem;
-        }
-        .unlocked-digit-display {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #16a34a; 
-            background-color: #dcfce7; 
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
+            border: 2px dashed #38bdf8; /* More prominent border */
+            padding: 0.75rem 1.25rem; /* Increased padding */
+            border-radius: 0.5rem;
+            font-family: 'Courier New', Courier, monospace; /* Classic monospace */
+            font-size: 1.25rem; /* Larger code */
+            color: #0369a1;
             display: inline-block;
             margin-top: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
         }
+        .referral-code:hover {
+            transform: scale(1.03);
+        }
+        .unlocked-digit-display {
+            font-size: 1.75rem; /* Larger digit */
+            font-weight: bold;
+            color: #15803d; /* Deeper green */
+            background-color: #d1fae5; /* Lighter green background */
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            display: inline-block;
+            margin-top: 0.75rem;
+            border: 2px solid #6ee7b7;
+            box-shadow: 0 4px 8px rgba(22, 163, 74, 0.2);
+        }
+
+        /* Competition Form Enhancements */
+        #competition .max-w-md { /* Targeting the form container */
+            animation: fadeInUp 0.8s ease-out 0.2s forwards;
+            opacity:0;
+        }
+        #code-input {
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        #code-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* Tailwind-like focus ring */
+        }
+        /* Message Area Styling */
+        #competition-message .alert-message {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            margin-top: 1rem;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        #competition-message .alert-success { background-color: #dcfce7; color: #166534; border: 1px solid #86efac;}
+        #competition-message .alert-error   { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;}
+        #competition-message .alert-info    { background-color: #e0f2fe; color: #0c4a6e; border: 1px solid #7dd3fc;}
+
+        /* Entrance Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        /* Hero Text Animations */
+        .hero-bg-competition h1 { animation: fadeInUp 0.8s ease-out 0.2s forwards; opacity:0; }
+        .hero-bg-competition p.text-xl { animation: fadeInUp 0.8s ease-out 0.4s forwards; opacity:0; }
+        .hero-bg-competition p.text-lg { animation: fadeInUp 0.8s ease-out 0.6s forwards; opacity:0; }
+
+        /* Section specific animations */
+        #competition, #team {
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+        }
+        #competition { animation-delay: 0.8s; }
+        #team { animation-delay: 1s; }
+
     </style>
 {% endblock extra_head %}
 
 {% block content %}
 <main class="flex-grow"> 
-    <section class="hero-bg-competition text-white py-20 md:py-24">
-        <div class="container mx-auto px-6 text-center">
+    <section class="hero-bg-competition text-white py-20 md:py-24 relative">
+        <div class="container mx-auto px-6 text-center relative z-10">
             <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight">Welcome to the HOXOBIL Pre-Launch!</h1>
             <p class="text-xl md:text-3xl font-light mb-6">"Unleashing Perfection Together."</p>
             
             <div id="countdown-timer-section" class="countdown-timer-container">
-                <h3 class="text-2xl font-semibold mb-4 text-yellow-400">Launching In:</h3>
+                <h3 class="text-2xl font-semibold mb-6 text-yellow-400 tracking-wider">Launching In:</h3>
                 <div id="countdown-timer" class="countdown-timer">
                     <div><span id="days" class="time-value">--</span><div class="time-label">Days</div></div>
                     <div><span id="hours" class="time-value">--</span><div class="time-label">Hours</div></div>
                     <div><span id="minutes" class="time-value">--</span><div class="time-label">Mins</div></div>
                     <div><span id="seconds" class="time-value">--</span><div class="time-label">Secs</div></div>
                 </div>
-                <div id="launched-message-container" class="mt-4" style="display: none;">
+                <div id="launched-message-container" class="mt-6" style="display: none;">
                     <p class="launched-message">HOXOBIL Has Launched! Explore Now!</p>
                 </div>
             </div>
 
             <p class="text-lg md:text-xl mb-10 max-w-3xl mx-auto">
                 Get ready for something amazing! While we're putting the final touches,
-                join our exclusive code-cracking competition. Be one of the <strong class="font-semibold">3 lucky winners</strong> to snag an awesome prize!
+                join our exclusive code-cracking competition. Be one of the <strong class="font-semibold text-yellow-300">3 lucky winners</strong> to snag an awesome prize!
             </p>
         </div>
     </section>
 
-    <section id="competition" class="py-16 bg-white">
+    <section id="competition" class="py-16 bg-slate-50"> {/* Changed background slightly */}
         <div class="container mx-auto px-6 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-4 text-gray-800">Crack the Code & Win!</h2>
+            <h2 class="text-3xl md:text-4xl font-bold mb-6 text-gray-800">Crack the Code & Win!</h2>
             
             {% if user.is_authenticated %}
                 <p class="text-gray-600 mb-8 max-w-xl mx-auto">
                     We've hidden 3 secret 6-digit codes. Enter your guess below. If you find one, you win!
-                    Good luck, {{ user.username }}! (Max 50 tries before a short break)
+                    Good luck, <strong class="text-indigo-600">{{ user.get_full_name|default:user.email }}</strong>! (Max 50 tries before a short break)
                 </p>
-                <div class="max-w-md mx-auto bg-gray-50 p-8 rounded-xl shadow-lg">
+                <div class="max-w-md mx-auto bg-white p-8 md:p-10 rounded-xl shadow-2xl"> {/* Enhanced shadow and padding */}
                     <form id="competition-form" novalidate> 
                         <div class="mb-6">
                             <label for="code-input" class="block text-sm font-medium text-gray-700 mb-2">Enter Your 6-Digit Code:</label>
                             <input type="number" id="code-input" name="code"
-                                   class="input-code appearance-none block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg text-center tracking-widest"
-                                   placeholder="XXXXXX" maxlength="6" 
+                                   class="input-code appearance-none block w-full px-4 py-3 border-2 border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-2xl text-center tracking-widest font-mono"
+                                   placeholder="______" maxlength="6" 
                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)">
-                            <p class="text-xs text-gray-500 mt-1">Only numbers, 6 digits long. Code will be checked automatically.</p>
+                            <p class="text-xs text-gray-500 mt-2">Only numbers, 6 digits long. Code will be checked automatically.</p>
                         </div>
-                    </form>
-                    <div id="competition-message" class="mt-6 text-lg min-h-[2em]"></div>
+                        </form>
+                    <div id="competition-message" class="mt-6 text-lg min-h-[2.5em]"></div> {/* Increased min-height */}
                     <div id="cooldown-timer-display" class="mt-4 text-lg font-semibold text-orange-600"></div>
-                    <div class="mt-4 text-sm text-gray-600">
-                        <p>Prizes remaining: <strong id="prizes-left-count">{{ prizes_left|default:"3" }}</strong> out of 3.</p>
+                    <div class="mt-6 text-sm text-gray-700">
+                        <p>Prizes remaining: <strong id="prizes-left-count" class="text-indigo-700 font-bold text-base">{{ prizes_left|default:"3" }}</strong> out of 3.</p>
                     </div>
 
-                    {# Referral Information Section - Corrected #}
                     {% if user_profile and user_profile.referral_code %}
                     <div class="referral-section">
                         <h4>YOUR REFERRAL STATUS</h4>
@@ -198,33 +339,30 @@
                         {% if user_profile.unlocked_first_digit %}
                             <p>Your unlocked first digit is: <span class="unlocked-digit-display">{{ user_profile.unlocked_first_digit }}</span></p>
                             {% if user_profile.unlocked_digit_from_code %}
-                                <p class="text-xs text-gray-500">(This digit is from winning code: {{ user_profile.unlocked_digit_from_code.code }})</p>
+                                <p class="text-xs text-gray-500 mt-1">(This digit is from winning code: {{ user_profile.unlocked_digit_from_code.code }})</p>
                             {% endif %}
                         {% else %}
-                            {# This condition already implies user_profile.referral_count < 30 if no digit is unlocked #}
                             <p>Refer 30 people to unlock the first digit of a winning code!</p>
                         {% endif %}
                     </div>
                     {% endif %}
-                    {# END: Referral Information Section #}
-
-                </div>
+                    </div>
             {% else %}
                 <p class="text-gray-700 my-8 max-w-xl mx-auto text-lg">
                     Please 
-                    <a href="{% url 'login' %}?next={{ request.path }}" class="text-blue-600 hover:text-blue-700 font-semibold underline">Sign In</a> or 
-                    <a href="{% url 'signup' %}?next={{ request.path }}" class="text-blue-600 hover:text-blue-700 font-semibold underline">Create an Account</a> 
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="text-indigo-600 hover:text-indigo-700 font-semibold underline hover:opacity-80 transition-opacity">Sign In</a> or 
+                    <a href="{% url 'signup' %}?next={{ request.path }}" class="text-indigo-600 hover:text-indigo-700 font-semibold underline hover:opacity-80 transition-opacity">Create an Account</a> 
                     to participate in the competition and get your referral code!
                 </p>
                 <div class="mt-4 text-sm text-gray-600">
-                    <p>Prizes remaining: <strong id="prizes-left-count">{{ prizes_left|default:"3" }}</strong> out of 3.</p>
+                    <p>Prizes remaining: <strong id="prizes-left-count" class="text-indigo-700 font-bold text-base">{{ prizes_left|default:"3" }}</strong> out of 3.</p>
                 </div>
             {% endif %}
 
             {% if launch_notes %}
-            <div class="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg text-center max-w-md mx-auto">
-                <h4 class="text-lg font-semibold text-blue-700 mb-2">A Special Note from the HOXOBIL Team:</h4>
-                <p class="text-blue-600 text-sm leading-relaxed">{{ launch_notes|linebreaksbr }}</p>
+            <div class="mt-12 p-6 bg-indigo-50 border-2 border-indigo-200 rounded-xl text-center max-w-lg mx-auto shadow-lg animate-fadeInUp" style="animation-delay: 0.5s;">
+                <h4 class="text-xl font-semibold text-indigo-700 mb-3">A Special Note from the HOXOBIL Team:</h4>
+                <p class="text-indigo-600 text-base leading-relaxed">{{ launch_notes|linebreaksbr }}</p>
             </div>
             {% endif %}
         </div>
@@ -233,37 +371,40 @@
     <section id="team" class="py-16 bg-gray-100 team-section">
         <div class="container mx-auto px-6 text-center">
             <h2 class="team-section-title-competition">Meet the HOXOBIL Team</h2>
+            
             <h3 class="team-category-title-competition">Leadership</h3>
             <div class="team-grid-competition"> 
                 <div class="team-member-competition">
                     <h3>IBJ IYANUOLUWA</h3>
-                    <p class="role">CEO</p>
+                    <p class="role">CEO & Visionary Director</p>
                 </div>
                 <div class="team-member-competition">
                     <h3>Chidiebere chineze angel</h3>
-                    <p class="role">Manager</p>
+                    <p class="role">Manager & Operations Lead</p>
                 </div>
             </div>
+
             <h3 class="team-category-title-competition">Design Team</h3>
             <div class="team-grid-competition">
                 <div class="team-member-competition">
                     <h3>Odukoya baseerah</h3>
-                    <p class="role">Designer</p>
+                    <p class="role">Lead Fashion Designer</p>
                 </div>
                 <div class="team-member-competition">
                     <h3>Farinto boluwatife</h3>
-                    <p class="role">Designer</p>
+                    <p class="role">Creative Pattern Maker</p>
                 </div>
             </div>
+
             <h3 class="team-category-title-competition">Faces of HOXOBIL (Models)</h3>
             <div class="team-grid-competition">
                 <div class="team-member-competition">
                     <h3>Lemo damilola</h3>
-                    <p class="role">Model</p>
+                    <p class="role">Brand Ambassador</p>
                 </div>
                 <div class="team-member-competition">
                     <h3>Aderemi faderera</h3>
-                    <p class="role">Model</p>
+                    <p class="role">Runway & Campaign Model</p>
                 </div>
             </div>
         </div>
@@ -283,7 +424,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const codeInput = document.getElementById('code-input'); 
     const messageDiv = document.getElementById('competition-message'); 
     const prizesLeftSpan = document.getElementById('prizes-left-count');
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
     
     const countdownTimerElement = document.getElementById('countdown-timer');
     const launchedMessageContainer = document.getElementById('launched-message-container');
@@ -293,50 +435,108 @@ document.addEventListener('DOMContentLoaded', function () {
     const launchDataElement = document.getElementById('launch-datetime-data');
     
     if (launchDataElement && launchDataElement.textContent) {
-        try { launchDateISO = JSON.parse(launchDataElement.textContent); } catch(e) { console.error("Error parsing launch date:", e); }
+        try { 
+            const parsedData = JSON.parse(launchDataElement.textContent);
+            if (parsedData) { // Check if parsedData is not null or empty string
+                launchDateISO = parsedData;
+            } else {
+                console.warn("Launch date data is null or empty after parsing.");
+            }
+        } catch(e) { 
+            console.error("Error parsing launch date:", e, "Raw content:", launchDataElement.textContent); 
+        }
+    } else {
+        console.warn("Launch date data element not found or has no content.");
     }
 
     function updateCountdown() {
         if (!launchDateISO || !countdownTimerElement) {
-            if (countdownTimerElement) countdownTimerElement.innerHTML = "<p class='text-lg text-center text-yellow-300'>Launch date not set yet. Stay tuned!</p>";
+            if (countdownTimerElement) {
+                 // Clear any existing content and show a message
+                while(countdownTimerElement.firstChild) {
+                    countdownTimerElement.removeChild(countdownTimerElement.firstChild);
+                }
+                const p = document.createElement('p');
+                p.className = 'text-lg text-center text-yellow-300';
+                p.textContent = launchDateISO === null ? 'Launch date coming soon!' : 'Launch date not set yet. Stay tuned!';
+                countdownTimerElement.appendChild(p);
+                // Hide the individual time unit divs if they exist
+                ['days', 'hours', 'minutes', 'seconds'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && el.parentElement) el.parentElement.style.display = 'none';
+                });
+            }
+            if(countdownInterval) clearInterval(countdownInterval); // Stop interval if no valid date
             return;
         }
+
         const launchTime = new Date(launchDateISO).getTime();
         const now = new Date().getTime();
         const distance = launchTime - now;
+
         if (distance < 0) {
             clearInterval(countdownInterval);
             if(countdownTimerElement) countdownTimerElement.style.display = 'none';
             if(launchedMessageContainer) launchedMessageContainer.style.display = 'block';
+            // Make sure individual time unit divs are hidden
+             ['days', 'hours', 'minutes', 'seconds'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.parentElement) el.parentElement.style.display = 'none';
+            });
             return;
         }
+
+        // Ensure time unit divs are visible if they were hidden
+        ['days', 'hours', 'minutes', 'seconds'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.parentElement) el.parentElement.style.display = 'block'; // or 'flex' if they are flex items
+        });
+        // Clear any message paragraph if it was added
+        const existingMessage = countdownTimerElement.querySelector('p');
+        if (existingMessage) existingMessage.remove();
+
+
         const days = Math.floor(distance / (1000 * 60 * 60 * 24));
         const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
         const daysEl = document.getElementById('days');
         const hoursEl = document.getElementById('hours');
         const minutesEl = document.getElementById('minutes');
         const secondsEl = document.getElementById('seconds');
+        
         if(daysEl) daysEl.textContent = String(days).padStart(2, '0');
         if(hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
         if(minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
         if(secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
     }
+    
     let countdownInterval;
-    if (launchDateISO) { updateCountdown(); countdownInterval = setInterval(updateCountdown, 1000); }
-    else { if(countdownTimerElement) countdownTimerElement.innerHTML = "<p class='text-lg text-center text-yellow-300'>Launch date coming soon!</p>"; }
+    // Initial call to set up the timer or message
+    updateCountdown(); 
+    if (launchDateISO) { // Only start interval if we have a valid date
+        countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
 
     let attemptCount = 0;
     const maxAttempts = 50;
-    const cooldownDuration = 10; 
+    const cooldownDuration = 10; // seconds
     let isCoolingDown = false;
     let isCheckingCode = false;
     let cooldownIntervalId = null;
 
     function displayCompetitionMessage(message, type = 'info') {
         if (!messageDiv) return;
-        messageDiv.innerHTML = `<div class="alert-message alert-${type}">${message}</div>`;
+        // Clear previous message classes
+        messageDiv.className = 'mt-6 text-lg min-h-[2.5em]'; // Reset classes
+        messageDiv.innerHTML = ''; // Clear content
+
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert-message alert-${type}`; // Add new classes
+        alertDiv.textContent = message;
+        messageDiv.appendChild(alertDiv);
     }
 
     function startCooldown() {
@@ -344,17 +544,22 @@ document.addEventListener('DOMContentLoaded', function () {
         if (codeInput) codeInput.disabled = true;
         let timeLeft = cooldownDuration;
         if (cooldownTimerDisplay) cooldownTimerDisplay.textContent = `Too many attempts. Please wait ${timeLeft} seconds...`;
-        if(cooldownIntervalId) clearInterval(cooldownIntervalId);
+        
+        if(cooldownIntervalId) clearInterval(cooldownIntervalId); // Clear any existing interval
         cooldownIntervalId = setInterval(() => {
             timeLeft--;
             if (cooldownTimerDisplay) cooldownTimerDisplay.textContent = `Too many attempts. Please wait ${timeLeft} seconds...`;
-            if (timeLeft <= 0) endCooldown();
+            if (timeLeft <= 0) {
+                endCooldown();
+            }
         }, 1000);
     }
 
     function endCooldown() {
-        clearInterval(cooldownIntervalId); cooldownIntervalId = null;
-        isCoolingDown = false; attemptCount = 0; 
+        clearInterval(cooldownIntervalId); 
+        cooldownIntervalId = null;
+        isCoolingDown = false; 
+        attemptCount = 0; 
         if (codeInput) codeInput.disabled = false;
         if (cooldownTimerDisplay) cooldownTimerDisplay.textContent = ''; 
         displayCompetitionMessage('You can try guessing again!', 'info');
@@ -366,15 +571,22 @@ document.addEventListener('DOMContentLoaded', function () {
             displayCompetitionMessage(data.message, 'success');
             if (codeInput) codeInput.disabled = true; 
             if (typeof data.prizes_left !== 'undefined' && prizesLeftSpan) prizesLeftSpan.textContent = data.prizes_left;
+            
             if (data.prizes_left === 0) {
-                messageDiv.innerHTML += '<div class="alert-message alert-info mt-4">All prizes have been claimed! Thanks for playing.</div>';
+                 const allClaimedDiv = document.createElement('div');
+                 allClaimedDiv.className = 'alert-message alert-info mt-4';
+                 allClaimedDiv.textContent = 'All prizes have been claimed! Thanks for playing.';
+                 if(messageDiv) messageDiv.appendChild(allClaimedDiv);
             }
         } else if (data.status === 'failure' || data.status === 'claimed') {
             displayCompetitionMessage(data.message, data.status === 'failure' ? 'error' : 'info');
             if (codeInput) codeInput.value = ''; 
             attemptCount++;
-            if (attemptCount >= maxAttempts) startCooldown();
-            else if (codeInput) codeInput.focus();
+            if (attemptCount >= maxAttempts && !isCoolingDown) { // Check !isCoolingDown to prevent multiple calls
+                startCooldown();
+            } else if (codeInput) {
+                codeInput.focus();
+            }
         } else if (data.status === 'all_claimed') {
              displayCompetitionMessage(data.message, 'info');
              if (prizesLeftSpan) prizesLeftSpan.textContent = '0';
@@ -383,35 +595,54 @@ document.addEventListener('DOMContentLoaded', function () {
             displayCompetitionMessage(data.message || 'An unknown error occurred.', 'error');
             if (codeInput) codeInput.value = ''; 
             attemptCount++;
-            if (attemptCount >= maxAttempts) startCooldown();
+            if (attemptCount >= maxAttempts && !isCoolingDown) {
+                startCooldown();
+            }
         }
     }
 
     function checkCode(codeValue) {
         if (isCheckingCode || isCoolingDown || (codeInput && codeInput.disabled)) return;
+        
+        if (!csrfToken) {
+            displayCompetitionMessage('Could not verify your request. Please refresh the page.', 'error');
+            console.error('CSRF token not found!');
+            return;
+        }
+
         isCheckingCode = true;
         displayCompetitionMessage('Checking your code...', 'info');
 
         fetch("{% url 'submit_competition_code' %}", { 
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrfToken },
+            headers: { 
+                'Content-Type': 'application/x-www-form-urlencoded', 
+                'X-CSRFToken': csrfToken 
+            },
             body: `code=${encodeURIComponent(codeValue)}` 
         })
         .then(response => {
-            if (response.status === 403) { 
+            if (response.status === 403) { // Forbidden, likely not authenticated
                  displayCompetitionMessage('Please sign in to submit a code.', 'error');
                  throw new Error('Login required by server'); 
             }
-            if (!response.ok) throw new Error(`Network response was not ok, status: ${response.status}`);
+            if (!response.ok) {
+                // Try to parse error from backend if available
+                return response.json().then(errData => {
+                    throw new Error(errData.message || `Network response was not ok, status: ${response.status}`);
+                }).catch(() => { // If no JSON error body, throw generic error
+                    throw new Error(`Network response was not ok, status: ${response.status}`);
+                });
+            }
             return response.json();
         })
         .then(data => {
             handleCodeCheckResponse(data);
         })
         .catch(error => {
-            if (error.message !== 'Login required by server') {
+            if (error.message !== 'Login required by server') { // Avoid double message
                 console.error('Error checking code:', error);
-                displayCompetitionMessage('An error occurred. Please try again.', 'error');
+                displayCompetitionMessage(error.message || 'An error occurred. Please try again.', 'error');
             }
             if (codeInput && !codeInput.disabled) codeInput.value = ''; 
         })
@@ -420,10 +651,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    const competitionForm = document.getElementById('competition-form'); 
     if (codeInput) { 
         codeInput.addEventListener('input', function() {
-            if (!isCoolingDown && messageDiv.firstChild && !messageDiv.textContent.includes("Please wait")) {
+            // Clear non-error messages when user starts typing, unless it's a cooldown message
+            if (!isCoolingDown && messageDiv && messageDiv.firstChild && 
+                !messageDiv.textContent.includes("Please wait") && 
+                !messageDiv.querySelector('.alert-error') &&
+                !messageDiv.querySelector('.alert-success') ) { // Don't clear success/error immediately
                  messageDiv.innerHTML = ''; 
             }
             if (this.value.length === 6) {
