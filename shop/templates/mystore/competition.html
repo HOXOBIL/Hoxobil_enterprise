@@ -1,23 +1,23 @@
 {% extends "mystore/base.html" %}
 {% load static %}
 
-{% block title %}HOXOBIL Pre-Launch Competition - Unleash Perfection!{% endblock title %}
+{% block title %}HOXOBIL Pre-Launch Competition - Enter the Neon Grid!{% endblock title %}
 
 {% block extra_head %}
     <meta name="csrf-token" content="{{ csrf_token }}">
     <style>
-        /* Styles specific to competition.html */
-        .hero-bg-competition {
-            /* Enhanced gradient with a subtle animation */
-            background: linear-gradient(135deg, #0a0a0a 0%, #1f1f1f 50%, #0a0a0a 100%);
-            background-size: 400% 400%; /* Required for gradient animation */
-            animation: gradientBG 20s ease infinite;
-            background-position: center;
-            overflow: hidden; /* Prevent scrollbars from pseudo-elements */
-            position: relative; /* For pseudo-elements */
+        body {
+            background-color: #0d0d1a; 
+            color: #e0e0e0;
         }
-
-        /* Subtle animated particles/stars in the hero background */
+        .hero-bg-competition {
+            background: linear-gradient(135deg, #0d0221 0%, #000000 60%, #240046 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 25s ease infinite;
+            background-position: center;
+            overflow: hidden;
+            position: relative;
+        }
         .hero-bg-competition::before {
             content: '';
             position: absolute;
@@ -26,13 +26,13 @@
             width: 100%;
             height: 100%;
             background-image:
-                radial-gradient(circle at 20% 20%, rgba(255,215,0,0.1) 1px, transparent 1px),
-                radial-gradient(circle at 80% 30%, rgba(255,215,0,0.1) 1px, transparent 1px),
-                radial-gradient(circle at 30% 70%, rgba(255,255,255,0.05) 1px, transparent 1px),
-                radial-gradient(circle at 70% 80%, rgba(255,255,255,0.05) 1px, transparent 1px);
-            background-size: 50px 50px, 70px 70px, 60px 60px, 80px 80px;
-            animation: starsMove 60s linear infinite;
-            opacity: 0.5;
+                radial-gradient(circle at 15% 25%, rgba(0, 255, 255, 0.15) 1px, transparent 1px),
+                radial-gradient(circle at 85% 35%, rgba(255, 0, 255, 0.15) 1px, transparent 1px),
+                radial-gradient(circle at 25% 75%, rgba(0, 220, 255, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 75% 85%, rgba(220, 0, 255, 0.1) 1px, transparent 1px);
+            background-size: 60px 60px, 80px 80px, 70px 70px, 90px 90px;
+            animation: starsMove 50s linear infinite;
+            opacity: 0.6;
         }
 
         @keyframes gradientBG {
@@ -43,7 +43,7 @@
 
         @keyframes starsMove {
             0% { background-position: 0 0, 0 0, 0 0, 0 0; }
-            100% { background-position: 100px 200px, -150px 100px, 200px -50px, -50px -150px; }
+            100% { background-position: 120px 240px, -180px 120px, 240px -60px, -60px -180px; }
         }
 
         .input-code::-webkit-outer-spin-button,
@@ -57,21 +57,22 @@
         }
         
         .team-section-title-competition { 
-            font-size: 2.25rem; 
-            line-height: 2.5rem; 
-            font-weight: 700; 
+            font-size: 2.5rem; 
+            line-height: 2.75rem; 
+            font-weight: 800; 
             margin-bottom: 3rem; 
-            color: #1f2937; 
+            color: #c026d3; /* Magenta */
+            text-shadow: 0 0 8px rgba(192, 38, 211, 0.5);
             animation: fadeInUp 0.8s ease-out forwards;
         }
         .team-category-title-competition {
-            font-size: 1.8rem; 
-            font-weight: 600;
-            color: #4a5568; 
+            font-size: 2rem; 
+            font-weight: 700;
+            color: #0ea5e9; /* Cyan/Sky Blue */
             margin-top: 3rem; 
             margin-bottom: 1.5rem; 
             text-align: center; 
-            animation: fadeInUp 0.8s ease-out 0.2s forwards; /* Staggered animation */
+            animation: fadeInUp 0.8s ease-out 0.2s forwards;
         }
         .team-category-title-competition:first-of-type {
             margin-top: 0; 
@@ -79,201 +80,248 @@
         .team-grid-competition {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 1.5rem; 
+            gap: 2rem; 
             max-width: 1100px; 
             margin-left: auto;
             margin-right: auto;
         }
         .team-member-competition { 
-            background-color: #ffffff; 
-            padding: 1.5rem; 
-            border-radius: 0.75rem; /* Slightly more rounded */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+            background-color: rgba(31, 29, 52, 0.8); /* Darker, slightly transparent */
+            border: 1px solid #4f46e5; /* Indigo border */
+            padding: 2rem; 
+            border-radius: 0.75rem; 
+            box-shadow: 0 0 25px rgba(79, 70, 229, 0.3), 0 0 10px rgba(192, 38, 211, 0.2) inset; 
             text-align: center; 
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            opacity: 0; /* For entrance animation */
-            transform: translateY(20px); /* For entrance animation */
+            opacity: 0;
+            transform: translateY(20px);
             animation: fadeInUp 0.6s ease-out forwards;
         }
-        /* Staggered animation for team members */
         .team-member-competition:nth-child(1) { animation-delay: 0.3s; }
         .team-member-competition:nth-child(2) { animation-delay: 0.4s; }
         .team-member-competition:nth-child(3) { animation-delay: 0.5s; }
         .team-member-competition:nth-child(4) { animation-delay: 0.6s; }
-        /* Add more if needed */
 
         .team-member-competition:hover {
-            transform: translateY(-5px) scale(1.03);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateY(-8px) scale(1.04);
+            box-shadow: 0 0 35px rgba(79, 70, 229, 0.5), 0 0 15px rgba(192, 38, 211, 0.3) inset;
         }
         .team-member-competition h3 {
-            font-size: 1.25rem; 
-            font-weight: 600; 
-            color: #111827; /* Darker for better contrast */
-            margin-bottom: 0.25rem; 
+            font-size: 1.35rem; 
+            font-weight: 700; 
+            color: #f0f0f0; 
+            margin-bottom: 0.35rem; 
         }
         .team-member-competition .role { 
-            color: #2563eb; 
+            color: #7dd3fc; /* Light Cyan */
             font-weight: 500; 
             margin-bottom: 0.5rem; 
-            font-size: 0.95rem; 
+            font-size: 1rem; 
         }
         
-        /* Enhanced Button Style */
         .btn-primary-competition { 
-            background-color: #1f2937; 
+            background: linear-gradient(135deg, #4f46e5 0%, #c026d3 100%); /* Indigo to Magenta */
             color: white;
-            padding: 0.75rem 1.5rem; /* Consistent padding */
+            padding: 0.85rem 1.75rem; 
             border-radius: 0.5rem;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            letter-spacing: 0.07em;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+            border: none;
         }
         .btn-primary-competition:hover {
-            background-color: #374151; 
-            transform: translateY(-2px);
-            box-shadow: 0 7px 14px rgba(0,0,0,0.1), 0 3px 6px rgba(0,0,0,0.08);
+            background: linear-gradient(135deg, #c026d3 0%, #4f46e5 100%);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(192, 38, 211, 0.5);
         }
         .btn-primary-competition:active {
-            transform: translateY(0px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
         }
 
         .prize-claimed {
             text-decoration: line-through;
-            color: #9ca3af; 
+            color: #6b7280; /* Muted gray */
         }
-        .countdown-timer-container { margin-top: 2rem; margin-bottom: 2.5rem; animation: fadeIn 1s ease-out 0.5s forwards; opacity:0; }
-        .countdown-timer { display: flex; justify-content: center; gap: 1rem; text-align: center; }
+        .countdown-timer-container { margin-top: 2.5rem; margin-bottom: 3rem; animation: fadeIn 1s ease-out 0.5s forwards; opacity:0; }
+        .countdown-timer { display: flex; justify-content: center; gap: 1.5rem; text-align: center; }
         .countdown-timer > div { 
-            background-color: rgba(255, 255, 255, 0.08); /* Slightly more subtle */
-            padding: 1rem 1.5rem; 
-            border-radius: 0.75rem; /* More rounded */
-            min-width: 80px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            background-color: rgba(13, 2, 33, 0.5); /* Darker, transparent */
+            border: 1px solid #4f46e5;
+            padding: 1.25rem 1.75rem; 
+            border-radius: 0.75rem; 
+            min-width: 90px; 
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
             transition: transform 0.3s ease;
         }
         .countdown-timer > div:hover {
-            transform: scale(1.05);
+            transform: scale(1.08);
         }
         .countdown-timer .time-value { 
-            font-size: 2.5rem; 
-            font-weight: 700; 
+            font-size: 3rem; 
+            font-weight: 800; 
             line-height: 1; 
-            color: #facc15; /* Gold color for timer */
-            text-shadow: 0 0 10px rgba(250, 204, 21, 0.5); /* Subtle glow */
+            color: #0ea5e9; /* Cyan */
+            text-shadow: 0 0 15px rgba(14, 165, 233, 0.7); 
         }
-        .countdown-timer .time-label { font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; color: #e5e7eb; margin-top: 0.25rem; }
-        .launched-message { font-size: 2rem; font-weight: bold; color: #22c55e; animation: pulse 2s infinite; }
-        #cooldown-timer-display { margin-top: 1rem; font-size: 1.1rem; font-weight: 500; color: #dd6b20; }
+        .countdown-timer .time-label { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.06em; color: #a5b4fc; margin-top: 0.35rem; }
+        .launched-message { font-size: 2.25rem; font-weight: bold; color: #22d3ee; animation: pulse 1.8s infinite; text-shadow: 0 0 10px #22d3ee;}
+        #cooldown-timer-display { margin-top: 1rem; font-size: 1.1rem; font-weight: 500; color: #f97316; }
 
-        /* Referral Section Styles - Enhanced */
         .referral-section {
-            margin-top: 2.5rem; 
-            padding: 2rem; /* Increased padding */
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); /* Light blue gradient */
-            border: 1px solid #bae6fd; 
-            border-radius: 0.75rem; /* More rounded */
+            margin-top: 3rem; 
+            padding: 2.5rem; 
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); /* Indigo dark gradient */
+            border: 1px solid #4f46e5; 
+            border-radius: 0.75rem; 
             text-align: left;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             animation: fadeInUp 0.8s ease-out 0.4s forwards;
         }
         .referral-section h4 {
-            font-size: 1.35rem; /* Slightly larger */
-            font-weight: 700; /* Bolder */
-            color: #075985; /* Deeper blue */
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            color: #a5b4fc; /* Light Indigo */
             margin-bottom: 1rem; 
         }
         .referral-section p {
             font-size: 1rem; 
-            color: #0c4a6e; 
+            color: #c7d2fe; /* Lighter Indigo */
             margin-bottom: 0.75rem; 
         }
         .referral-section strong {
             font-weight: 600;
-            color: #0369a1; 
+            color: #e0e7ff; 
         }
         .referral-code {
-            background-color: #ffffff;
-            border: 2px dashed #38bdf8; /* More prominent border */
-            padding: 0.75rem 1.25rem; /* Increased padding */
+            background-color: #0d0d1a;
+            border: 2px dashed #4f46e5; 
+            padding: 0.75rem 1.25rem; 
             border-radius: 0.5rem;
-            font-family: 'Courier New', Courier, monospace; /* Classic monospace */
-            font-size: 1.25rem; /* Larger code */
-            color: #0369a1;
+            font-family: 'Consolas', 'Menlo', 'Monaco', monospace;
+            font-size: 1.35rem; 
+            color: #7dd3fc; /* Light Cyan */
             display: inline-block;
             margin-top: 0.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: transform 0.2s ease;
+            box-shadow: 0 0 10px rgba(79, 70, 229, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .referral-code:hover {
             transform: scale(1.03);
+            box-shadow: 0 0 15px rgba(79, 70, 229, 0.5);
         }
         .unlocked-digit-display {
-            font-size: 1.75rem; /* Larger digit */
+            font-size: 2rem; 
             font-weight: bold;
-            color: #15803d; /* Deeper green */
-            background-color: #d1fae5; /* Lighter green background */
+            color: #34d399; /* Emerald Green */
+            background-color: rgba(16, 185, 129, 0.1); 
             padding: 0.75rem 1.25rem;
             border-radius: 0.5rem;
             display: inline-block;
             margin-top: 0.75rem;
-            border: 2px solid #6ee7b7;
-            box-shadow: 0 4px 8px rgba(22, 163, 74, 0.2);
+            border: 2px solid #34d399;
+            box-shadow: 0 0 15px rgba(52, 211, 153, 0.4);
         }
 
-        /* Competition Form Enhancements */
-        #competition .max-w-md { /* Targeting the form container */
+        #competition .max-w-md {
             animation: fadeInUp 0.8s ease-out 0.2s forwards;
             opacity:0;
+            background-color: rgba(13,2,33, 0.7); /* Darker form background */
+            border: 1px solid #312e81;
+            box-shadow: 0 0 30px rgba(79, 70, 229, 0.3);
         }
         #code-input {
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background-color: rgba(255,255,255,0.05);
+            border-color: #4f46e5;
+            color: #e0e0e0;
+        }
+        #code-input::placeholder {
+            color: #9ca3af;
         }
         #code-input:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* Tailwind-like focus ring */
+            border-color: #c026d3; /* Magenta focus */
+            box-shadow: 0 0 0 3px rgba(192, 38, 211, 0.4); 
+            background-color: rgba(255,255,255,0.1);
         }
-        /* Message Area Styling */
         #competition-message .alert-message {
             padding: 1rem;
             border-radius: 0.5rem;
             font-weight: 500;
             margin-top: 1rem;
             animation: fadeIn 0.5s ease-out forwards;
+            border-width: 1px;
         }
-        #competition-message .alert-success { background-color: #dcfce7; color: #166534; border: 1px solid #86efac;}
-        #competition-message .alert-error   { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;}
-        #competition-message .alert-info    { background-color: #e0f2fe; color: #0c4a6e; border: 1px solid #7dd3fc;}
+        #competition-message .alert-success { background-color: rgba(34,197,94,0.2); color: #6ee7b7; border-color: #34d399;}
+        #competition-message .alert-error   { background-color: rgba(239,68,68,0.2); color: #fca5a5; border-color: #ef4444;}
+        #competition-message .alert-info    { background-color: rgba(59,130,246,0.2); color: #93c5fd; border-color: #3b82f6;}
 
-        /* Entrance Animations */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
         @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.05); }
+            0%, 100% { opacity: 1; transform: scale(1); text-shadow: 0 0 10px #22d3ee; }
+            50% { opacity: 0.8; transform: scale(1.03); text-shadow: 0 0 20px #22d3ee; }
         }
 
-        /* Hero Text Animations */
-        .hero-bg-competition h1 { animation: fadeInUp 0.8s ease-out 0.2s forwards; opacity:0; }
-        .hero-bg-competition p.text-xl { animation: fadeInUp 0.8s ease-out 0.4s forwards; opacity:0; }
-        .hero-bg-competition p.text-lg { animation: fadeInUp 0.8s ease-out 0.6s forwards; opacity:0; }
+        .hero-bg-competition h1 { animation: fadeInUp 0.8s ease-out 0.2s forwards; opacity:0; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3), 0 0 20px rgba(79, 70, 229, 0.5); }
+        .hero-bg-competition p.text-xl { animation: fadeInUp 0.8s ease-out 0.4s forwards; opacity:0; color: #e0e7ff; }
+        .hero-bg-competition p.text-lg { animation: fadeInUp 0.8s ease-out 0.6s forwards; opacity:0; color: #d1d5db; }
 
-        /* Section specific animations */
         #competition, #team {
             opacity: 0;
             animation: fadeIn 1s ease-out forwards;
         }
-        #competition { animation-delay: 0.8s; }
-        #team { animation-delay: 1s; }
+        #competition { animation-delay: 0.8s; background-color: #0f0f22; } /* Darker section bg */
+        #team { animation-delay: 1s; background-color: #0d0d1a; } /* Even darker for team */
+
+        #competition h2, #team h2 { color: #a5b4fc; }
+        #competition p, #team p { color: #cbd5e1; }
+        #competition label { color: #e0e7ff; }
+        #competition .text-gray-500 { color: #94a3b8 !important; }
+        #competition .text-gray-600 { color: #cbd5e1 !important; }
+        #competition .text-gray-700 { color: #e0e7ff !important; }
+        #competition .text-gray-800 { color: #f8fafc !important; }
+        #competition .text-indigo-600 { color: #7dd3fc !important; }
+        #competition .text-indigo-700 { color: #a5b4fc !important; }
+        #competition .hover\:text-indigo-700:hover { color: #c7d2fe !important; }
+        #competition .border-indigo-200 { border-color: #312e81 !important; }
+        #competition .bg-indigo-50 { background-color: rgba(49, 46, 129, 0.3) !important; }
+        #competition .text-indigo-700 { color: #a5b4fc !important; }
+        #competition .text-indigo-600 { color: #c7d2fe !important; }
+
+        .launch-notes-container {
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background-color: rgba(13, 2, 33, 0.6);
+            border: 1px solid #4f46e5;
+            border-radius: 0.75rem;
+            text-align: center;
+            max-width: lg;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+            animation: fadeInUp 0.8s ease-out 0.5s forwards;
+            opacity: 0;
+        }
+        .launch-notes-container h4 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #a5b4fc; /* Light Indigo */
+            margin-bottom: 0.75rem;
+        }
+        .launch-notes-container p {
+            color: #e0e7ff; /* Lighter Indigo */
+            font-size: 1rem;
+            line-height: 1.75;
+        }
 
     </style>
 {% endblock extra_head %}
@@ -282,11 +330,11 @@
 <main class="flex-grow"> 
     <section class="hero-bg-competition text-white py-20 md:py-24 relative">
         <div class="container mx-auto px-6 text-center relative z-10">
-            <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight">Welcome to the HOXOBIL Pre-Launch!</h1>
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight">HOXOBIL PRE-LAUNCH</h1>
             <p class="text-xl md:text-3xl font-light mb-6">"Unleashing Perfection Together."</p>
             
             <div id="countdown-timer-section" class="countdown-timer-container">
-                <h3 class="text-2xl font-semibold mb-6 text-yellow-400 tracking-wider">Launching In:</h3>
+                <h3 class="text-2xl font-semibold mb-6 text-cyan-400 tracking-wider">Launching In:</h3>
                 <div id="countdown-timer" class="countdown-timer">
                     <div><span id="days" class="time-value">--</span><div class="time-label">Days</div></div>
                     <div><span id="hours" class="time-value">--</span><div class="time-label">Hours</div></div>
@@ -299,36 +347,36 @@
             </div>
 
             <p class="text-lg md:text-xl mb-10 max-w-3xl mx-auto">
-                Get ready for something amazing! While we're putting the final touches,
-                join our exclusive code-cracking competition. Be one of the <strong class="font-semibold text-yellow-300">3 lucky winners</strong> to snag an awesome prize!
+                The future of fashion is near! Join our exclusive code-cracking competition.
+                Be one of <strong class="font-semibold text-magenta-400">3 lucky winners</strong> to claim an electrifying prize!
             </p>
         </div>
     </section>
 
-    <section id="competition" class="py-16 bg-slate-50"> {/* Changed background slightly */}
+    <section id="competition" class="py-16">
         <div class="container mx-auto px-6 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-6 text-gray-800">Crack the Code & Win!</h2>
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">Crack the Code & Win!</h2>
             
             {% if user.is_authenticated %}
-                <p class="text-gray-600 mb-8 max-w-xl mx-auto">
-                    We've hidden 3 secret 6-digit codes. Enter your guess below. If you find one, you win!
-                    Good luck, <strong class="text-indigo-600">{{ user.get_full_name|default:user.email }}</strong>! (Max 50 tries before a short break)
+                <p class="mb-8 max-w-xl mx-auto">
+                    Three secret 6-digit codes are hidden. Enter your guess. Find one, you win!
+                    Good luck, <strong class="text-cyan-400">{{ user.get_full_name|default:user.email }}</strong>! (Max 50 tries before cooldown)
                 </p>
-                <div class="max-w-md mx-auto bg-white p-8 md:p-10 rounded-xl shadow-2xl"> {/* Enhanced shadow and padding */}
+                <div class="max-w-md mx-auto p-8 md:p-10 rounded-xl">
                     <form id="competition-form" novalidate> 
                         <div class="mb-6">
-                            <label for="code-input" class="block text-sm font-medium text-gray-700 mb-2">Enter Your 6-Digit Code:</label>
+                            <label for="code-input" class="block text-sm font-medium mb-2">Enter Your 6-Digit Code:</label>
                             <input type="number" id="code-input" name="code"
-                                   class="input-code appearance-none block w-full px-4 py-3 border-2 border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-2xl text-center tracking-widest font-mono"
+                                   class="input-code appearance-none block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-500 focus:outline-none text-2xl text-center tracking-widest font-mono"
                                    placeholder="______" maxlength="6" 
                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)">
-                            <p class="text-xs text-gray-500 mt-2">Only numbers, 6 digits long. Code will be checked automatically.</p>
+                            <p class="text-xs mt-2">Numbers only, 6 digits. Auto-checks.</p>
                         </div>
-                        </form>
-                    <div id="competition-message" class="mt-6 text-lg min-h-[2.5em]"></div> {/* Increased min-height */}
-                    <div id="cooldown-timer-display" class="mt-4 text-lg font-semibold text-orange-600"></div>
-                    <div class="mt-6 text-sm text-gray-700">
-                        <p>Prizes remaining: <strong id="prizes-left-count" class="text-indigo-700 font-bold text-base">{{ prizes_left|default:"3" }}</strong> out of 3.</p>
+                    </form>
+                    <div id="competition-message" class="mt-6 text-lg min-h-[2.5em]"></div>
+                    <div id="cooldown-timer-display" class="mt-4 text-lg font-semibold"></div>
+                    <div class="mt-6 text-sm">
+                        <p>Prizes remaining: <strong id="prizes-left-count" class="font-bold text-base text-cyan-400">{{ prizes_left|default:"3" }}</strong> out of 3.</p>
                     </div>
 
                     {% if user_profile and user_profile.referral_code %}
@@ -339,36 +387,36 @@
                         {% if user_profile.unlocked_first_digit %}
                             <p>Your unlocked first digit is: <span class="unlocked-digit-display">{{ user_profile.unlocked_first_digit }}</span></p>
                             {% if user_profile.unlocked_digit_from_code %}
-                                <p class="text-xs text-gray-500 mt-1">(This digit is from winning code: {{ user_profile.unlocked_digit_from_code.code }})</p>
+                                <p class="text-xs mt-1">(From winning code: {{ user_profile.unlocked_digit_from_code.code }})</p>
                             {% endif %}
                         {% else %}
                             <p>Refer 30 people to unlock the first digit of a winning code!</p>
                         {% endif %}
                     </div>
                     {% endif %}
-                    </div>
+                </div>
             {% else %}
-                <p class="text-gray-700 my-8 max-w-xl mx-auto text-lg">
+                <p class="my-8 max-w-xl mx-auto text-lg">
                     Please 
-                    <a href="{% url 'login' %}?next={{ request.path }}" class="text-indigo-600 hover:text-indigo-700 font-semibold underline hover:opacity-80 transition-opacity">Sign In</a> or 
-                    <a href="{% url 'signup' %}?next={{ request.path }}" class="text-indigo-600 hover:text-indigo-700 font-semibold underline hover:opacity-80 transition-opacity">Create an Account</a> 
-                    to participate in the competition and get your referral code!
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="text-cyan-400 hover:text-cyan-300 font-semibold underline hover:opacity-80 transition-opacity">Sign In</a> or 
+                    <a href="{% url 'signup' %}?next={{ request.path }}" class="text-cyan-400 hover:text-cyan-300 font-semibold underline hover:opacity-80 transition-opacity">Create an Account</a> 
+                    to participate and get your referral code!
                 </p>
-                <div class="mt-4 text-sm text-gray-600">
-                    <p>Prizes remaining: <strong id="prizes-left-count" class="text-indigo-700 font-bold text-base">{{ prizes_left|default:"3" }}</strong> out of 3.</p>
+                <div class="mt-4 text-sm">
+                    <p>Prizes remaining: <strong id="prizes-left-count" class="font-bold text-base text-cyan-400">{{ prizes_left|default:"3" }}</strong> out of 3.</p>
                 </div>
             {% endif %}
 
             {% if launch_notes %}
-            <div class="mt-12 p-6 bg-indigo-50 border-2 border-indigo-200 rounded-xl text-center max-w-lg mx-auto shadow-lg animate-fadeInUp" style="animation-delay: 0.5s;">
-                <h4 class="text-xl font-semibold text-indigo-700 mb-3">A Special Note from the HOXOBIL Team:</h4>
-                <p class="text-indigo-600 text-base leading-relaxed">{{ launch_notes|linebreaksbr }}</p>
+            <div class="launch-notes-container">
+                <h4>A Special Note from the HOXOBIL Team:</h4>
+                <p>{{ launch_notes|linebreaksbr }}</p>
             </div>
             {% endif %}
         </div>
     </section>
 
-    <section id="team" class="py-16 bg-gray-100 team-section">
+    <section id="team" class="py-16 team-section">
         <div class="container mx-auto px-6 text-center">
             <h2 class="team-section-title-competition">Meet the HOXOBIL Team</h2>
             
@@ -437,36 +485,30 @@ document.addEventListener('DOMContentLoaded', function () {
     if (launchDataElement && launchDataElement.textContent) {
         try { 
             const parsedData = JSON.parse(launchDataElement.textContent);
-            if (parsedData) { // Check if parsedData is not null or empty string
+            if (parsedData) {
                 launchDateISO = parsedData;
-            } else {
-                console.warn("Launch date data is null or empty after parsing.");
             }
         } catch(e) { 
-            console.error("Error parsing launch date:", e, "Raw content:", launchDataElement.textContent); 
+            console.error("Error parsing launch date:", e); 
         }
-    } else {
-        console.warn("Launch date data element not found or has no content.");
     }
 
     function updateCountdown() {
         if (!launchDateISO || !countdownTimerElement) {
             if (countdownTimerElement) {
-                 // Clear any existing content and show a message
                 while(countdownTimerElement.firstChild) {
                     countdownTimerElement.removeChild(countdownTimerElement.firstChild);
                 }
                 const p = document.createElement('p');
-                p.className = 'text-lg text-center text-yellow-300';
-                p.textContent = launchDateISO === null ? 'Launch date coming soon!' : 'Launch date not set yet. Stay tuned!';
+                p.className = 'text-lg text-center text-cyan-300';
+                p.textContent = launchDateISO === null ? 'Launch date coming soon!' : 'Launch date not set. Stay tuned!';
                 countdownTimerElement.appendChild(p);
-                // Hide the individual time unit divs if they exist
                 ['days', 'hours', 'minutes', 'seconds'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el && el.parentElement) el.parentElement.style.display = 'none';
                 });
             }
-            if(countdownInterval) clearInterval(countdownInterval); // Stop interval if no valid date
+            if(countdownInterval) clearInterval(countdownInterval);
             return;
         }
 
@@ -478,7 +520,6 @@ document.addEventListener('DOMContentLoaded', function () {
             clearInterval(countdownInterval);
             if(countdownTimerElement) countdownTimerElement.style.display = 'none';
             if(launchedMessageContainer) launchedMessageContainer.style.display = 'block';
-            // Make sure individual time unit divs are hidden
              ['days', 'hours', 'minutes', 'seconds'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el && el.parentElement) el.parentElement.style.display = 'none';
@@ -486,15 +527,12 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // Ensure time unit divs are visible if they were hidden
         ['days', 'hours', 'minutes', 'seconds'].forEach(id => {
             const el = document.getElementById(id);
-            if (el && el.parentElement) el.parentElement.style.display = 'block'; // or 'flex' if they are flex items
+            if (el && el.parentElement) el.parentElement.style.display = 'block';
         });
-        // Clear any message paragraph if it was added
         const existingMessage = countdownTimerElement.querySelector('p');
         if (existingMessage) existingMessage.remove();
-
 
         const days = Math.floor(distance / (1000 * 60 * 60 * 24));
         const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -513,28 +551,25 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
     let countdownInterval;
-    // Initial call to set up the timer or message
     updateCountdown(); 
-    if (launchDateISO) { // Only start interval if we have a valid date
+    if (launchDateISO) {
         countdownInterval = setInterval(updateCountdown, 1000);
     }
 
-
     let attemptCount = 0;
     const maxAttempts = 50;
-    const cooldownDuration = 10; // seconds
+    const cooldownDuration = 10;
     let isCoolingDown = false;
     let isCheckingCode = false;
     let cooldownIntervalId = null;
 
     function displayCompetitionMessage(message, type = 'info') {
         if (!messageDiv) return;
-        // Clear previous message classes
-        messageDiv.className = 'mt-6 text-lg min-h-[2.5em]'; // Reset classes
-        messageDiv.innerHTML = ''; // Clear content
+        messageDiv.className = 'mt-6 text-lg min-h-[2.5em]';
+        messageDiv.innerHTML = '';
 
         const alertDiv = document.createElement('div');
-        alertDiv.className = `alert-message alert-${type}`; // Add new classes
+        alertDiv.className = `alert-message alert-${type}`;
         alertDiv.textContent = message;
         messageDiv.appendChild(alertDiv);
     }
@@ -545,7 +580,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let timeLeft = cooldownDuration;
         if (cooldownTimerDisplay) cooldownTimerDisplay.textContent = `Too many attempts. Please wait ${timeLeft} seconds...`;
         
-        if(cooldownIntervalId) clearInterval(cooldownIntervalId); // Clear any existing interval
+        if(cooldownIntervalId) clearInterval(cooldownIntervalId);
         cooldownIntervalId = setInterval(() => {
             timeLeft--;
             if (cooldownTimerDisplay) cooldownTimerDisplay.textContent = `Too many attempts. Please wait ${timeLeft} seconds...`;
@@ -582,7 +617,7 @@ document.addEventListener('DOMContentLoaded', function () {
             displayCompetitionMessage(data.message, data.status === 'failure' ? 'error' : 'info');
             if (codeInput) codeInput.value = ''; 
             attemptCount++;
-            if (attemptCount >= maxAttempts && !isCoolingDown) { // Check !isCoolingDown to prevent multiple calls
+            if (attemptCount >= maxAttempts && !isCoolingDown) {
                 startCooldown();
             } else if (codeInput) {
                 codeInput.focus();
@@ -606,7 +641,6 @@ document.addEventListener('DOMContentLoaded', function () {
         
         if (!csrfToken) {
             displayCompetitionMessage('Could not verify your request. Please refresh the page.', 'error');
-            console.error('CSRF token not found!');
             return;
         }
 
@@ -622,15 +656,14 @@ document.addEventListener('DOMContentLoaded', function () {
             body: `code=${encodeURIComponent(codeValue)}` 
         })
         .then(response => {
-            if (response.status === 403) { // Forbidden, likely not authenticated
+            if (response.status === 403) {
                  displayCompetitionMessage('Please sign in to submit a code.', 'error');
                  throw new Error('Login required by server'); 
             }
             if (!response.ok) {
-                // Try to parse error from backend if available
                 return response.json().then(errData => {
                     throw new Error(errData.message || `Network response was not ok, status: ${response.status}`);
-                }).catch(() => { // If no JSON error body, throw generic error
+                }).catch(() => {
                     throw new Error(`Network response was not ok, status: ${response.status}`);
                 });
             }
@@ -640,8 +673,7 @@ document.addEventListener('DOMContentLoaded', function () {
             handleCodeCheckResponse(data);
         })
         .catch(error => {
-            if (error.message !== 'Login required by server') { // Avoid double message
-                console.error('Error checking code:', error);
+            if (error.message !== 'Login required by server') {
                 displayCompetitionMessage(error.message || 'An error occurred. Please try again.', 'error');
             }
             if (codeInput && !codeInput.disabled) codeInput.value = ''; 
@@ -653,11 +685,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (codeInput) { 
         codeInput.addEventListener('input', function() {
-            // Clear non-error messages when user starts typing, unless it's a cooldown message
             if (!isCoolingDown && messageDiv && messageDiv.firstChild && 
                 !messageDiv.textContent.includes("Please wait") && 
                 !messageDiv.querySelector('.alert-error') &&
-                !messageDiv.querySelector('.alert-success') ) { // Don't clear success/error immediately
+                !messageDiv.querySelector('.alert-success') ) {
                  messageDiv.innerHTML = ''; 
             }
             if (this.value.length === 6) {
