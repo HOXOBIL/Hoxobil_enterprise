@@ -1,33 +1,29 @@
 #!/bin/bash
 
-# Exit script if any command fails
+# Exit on errors
 set -e
 
-# Get commit message or use timestamp
-COMMIT_MSG=${1:-"Auto-commit on $(date '+%Y-%m-%d %H:%M:%S')"}
+while true
+do
+  COMMIT_MSG="Auto-commit on $(date '+%Y-%m-%d %H:%M:%S')"
 
-echo "Ì¥Ñ Adding changes..."
-git add .
+  git add .
 
-# Check if there are any changes to commit
-if git diff-index --quiet HEAD --; then
-  echo "‚úÖ No changes to commit."
-else
-  echo "Ì≥ù Committing with message: $COMMIT_MSG"
-  git commit -m "$COMMIT_MSG"
-fi
+  # Only commit if there are changes
+  if git diff-index --quiet HEAD --; then
+    echo "‚è≥ No changes to commit..."
+  else
+    echo "üì¶ Committing: $COMMIT_MSG"
+    git commit -m "$COMMIT_MSG"
+  fi
 
-# Check if branch has upstream set
-UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+  # Push to upstream (auto-set if not defined)
+  if git rev-parse --abbrev-ref --symbolic-full-name @{u} &>/dev/null; then
+    git push
+  else
+    git push --set-upstream origin main
+  fi
 
-if [ -z "$UPSTREAM" ]; then
-  echo "Ìºê Setting upstream and pushing..."
-  git push --set-upstream origin main
-else
-  echo "Ì∫Ä Pushing to $UPSTREAM"
-  git push
-fi
-
-echo "‚úÖ Done!"
-
-
+  echo "‚úÖ Synced! Waiting 5 seconds..."
+  sleep 5
+done
