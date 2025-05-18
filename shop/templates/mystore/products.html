@@ -1,0 +1,432 @@
+{% extends "mystore/base.html" %}
+{% load static %}
+
+{% block title %}HOXOBIL Products - Curated Collections{% endblock title %}
+
+{% block extra_head %}
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <style>
+        body {
+            background-color: #121212; 
+            color: #e0e0e0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .page-header-products {
+            text-align: center;
+            padding: 3rem 1rem 2rem 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #333;
+        }
+        .page-title-products { 
+            font-size: 2.75rem; 
+            color: #ffffff; 
+            font-weight: 700; 
+            letter-spacing: -0.025em;
+            text-transform: uppercase;
+        }
+        .page-subtitle-products {
+            font-size: 1.1rem;
+            color: #a0a0a0;
+            margin-top: 0.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .category-title-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        .category-title { 
+            font-size: 2rem; 
+            font-weight: 600; 
+            color: #00aaff; /* Vibrant Blue Accent */
+            margin-top: 3.5rem; 
+            margin-bottom: 2rem; 
+            padding-bottom: 0.75rem; 
+            border-bottom: 2px solid #00aaff;
+            text-align: left; 
+            display: inline-block;
+        }
+        .product-grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Slightly larger min size */
+            gap: 2.5rem; 
+            padding: 0 1rem 3rem 1rem; 
+            max-width: 1280px; 
+            margin: 0 auto;
+        }
+        .product-card {
+            background: #1e1e1e; 
+            border: 1px solid #2d2d2d;
+            border-radius: 12px; 
+            text-align: left;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        .product-card:nth-child(odd) { animation-delay: 0.1s; }
+        .product-card:nth-child(even) { animation-delay: 0.2s; }
+
+        .product-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 16px 32px rgba(0, 170, 255, 0.2), 0 0 15px rgba(0,0,0,0.4); 
+        }
+        
+        .product-card a.product-link { 
+            text-decoration: none; 
+            color: inherit; 
+            display: flex; /* Changed to flex for image container */
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .product-image-container { 
+            width: 100%;
+            padding-top: 100%; /* Aspect ratio 1:1 */
+            position: relative;
+            overflow: hidden; 
+            background-color: #282828;
+        }
+        .product-card img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; /* Cover ensures image fills, might crop */
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .product-card:hover img {
+            transform: scale(1.08);
+        }
+        .product-card-content { 
+            padding: 1.5rem; 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+        }
+        .product-title {
+            font-size: 1.25rem; 
+            font-weight: 600;  
+            margin: 0 0 0.75rem 0; 
+            color: #ffffff; 
+            line-height: 1.4;
+            min-height: 2.8em; 
+        }
+        .price { 
+            color: #00aaff; 
+            font-size: 1.4rem; 
+            font-weight: 700; 
+            margin-top: 0.5rem; 
+            margin-bottom: 1.25rem; 
+        }
+        .variant-selector {
+            width: 100%; 
+            padding: 0.75rem; 
+            margin-bottom: 1.5rem; 
+            border: 1px solid #444; 
+            border-radius: 6px; 
+            background-color: #2a2a2a; 
+            color: #e0e0e0;
+            font-size: 0.95rem; 
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .variant-selector:focus {
+            outline: none;
+            border-color: #00aaff; 
+            box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.3); 
+        }
+        .variant-selector:disabled { 
+            background-color: #383838; 
+            cursor: not-allowed; 
+            opacity: 0.6;
+        }
+
+        .btn-add-to-cart {
+            background: linear-gradient(45deg, #00aaff, #0077cc);
+            color: white; 
+            border: none;
+            padding: 0.9rem 1.5rem; 
+            text-align: center; 
+            text-decoration: none;
+            display: inline-block; 
+            font-size: 1rem; 
+            font-weight: 600; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: auto; 
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 10px rgba(0, 170, 255, 0.2);
+        }
+        .btn-add-to-cart:hover { 
+            background: linear-gradient(45deg, #0077cc, #00aaff);
+            box-shadow: 0 6px 15px rgba(0, 170, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        .btn-add-to-cart:active {
+            transform: translateY(0px);
+            box-shadow: 0 4px 10px rgba(0, 170, 255, 0.2);
+        }
+        .btn-add-to-cart:disabled { 
+            background: #444; 
+            cursor: not-allowed; 
+            opacity: 0.7; 
+            box-shadow: none;
+            transform: none;
+        }
+
+        .no-products {
+            text-align: center; 
+            padding: 5rem 2rem; 
+            font-size: 1.35rem; 
+            color: #888; 
+            grid-column: 1 / -1; 
+        }
+        .no-products a {
+            color: #00aaff;
+            text-decoration: underline;
+        }
+        .no-products a:hover {
+            color: #00cfff;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .page-title-products { font-size: 2.25rem; }
+            .category-title { font-size: 1.75rem; }
+            .product-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+            .product-image-container { height: 220px; }
+            .product-title { font-size: 1.1rem; }
+            .price { font-size: 1.2rem; }
+        }
+         @media (max-width: 480px) {
+            .product-grid { grid-template-columns: 1fr; } /* Single column on very small screens */
+             .page-title-products { font-size: 1.8rem; }
+             .category-title { font-size: 1.5rem; }
+         }
+    </style>
+{% endblock extra_head %}
+
+{% block content %}
+    <div class="page-header-products">
+        <h1 class="page-title-products">Discover Our Collections</h1>
+        <p class="page-subtitle-products">Curated pieces designed for the modern individual. Find your unique style with HOXOBIL.</p>
+    </div>
+
+    {% if categorized_products %}
+        {% for category_name, products_in_category in categorized_products.items %}
+            <div class="category-title-container"> 
+                <h2 class="category-title">{{ category_name }}</h2>
+            </div>
+            <div class="product-grid">
+                {% for product in products_in_category %}
+                    <div class="product-card" id="product-card-{{ product.id }}">
+                        <a href="{% url 'product_detail' product.id %}" class="product-link">
+                            <div class="product-image-container">
+                                <img src="{{ product.image_url }}" alt="{{ product.title }}">
+                            </div>
+                            <div class="product-card-content">
+                                <div>
+                                    <h3 class="product-title">{{ product.title }}</h3>
+                                    <div class="price" id="price-{{ product.id }}">
+                                        ₦{{ product.price|floatformat:0 }} 
+                                    </div>
+
+                                    {% if product.variants|length > 1 %}
+                                        <select class="variant-selector" name="selected_variant_id" 
+                                                id="variant-selector-{{ product.id }}" 
+                                                data-product-id="{{ product.id }}">
+                                            {% for variant in product.variants %}
+                                                {% if variant.is_enabled and variant.is_available %}
+                                                    <option value="{{ variant.id }}" data-price-ngn="{{ variant.price_ngn|floatformat:0 }}">
+                                                        {{ variant.title }} (₦{{ variant.price_ngn|floatformat:0 }})
+                                                    </option>
+                                                {% else %}
+                                                    <option value="{{ variant.id }}" disabled>
+                                                        {{ variant.title }} (Unavailable)
+                                                    </option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                    {% elif product.variants|length == 1 %}
+                                         <input type="hidden" id="variant-selector-{{ product.id }}" name="selected_variant_id" value="{{ product.variants.0.id }}">
+                                    {% else %}
+                                        <input type="hidden" id="variant-selector-{{ product.id }}" name="selected_variant_id" value="">
+                                    {% endif %}
+                                </div>
+                                
+                                <button type="button" class="btn-add-to-cart" 
+                                        data-product-id="{{ product.id }}"
+                                        data-add-to-cart-url="{% url 'add_to_cart' product.id %}">
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% elif error %}
+         <p class="no-products">{{ error }} <br>Please <a href="{% url 'product_list' %}">try refreshing</a> or check back soon.</p>
+    {% else %}
+        <div class="container mx-auto">
+            <p class="no-products">
+                Our collections are currently empty. Fresh styles arriving soon!
+            </p>
+        </div>
+    {% endif %}
+{% endblock content %}
+
+{% block extra_script %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+
+    document.querySelectorAll('.variant-selector').forEach(selector => {
+        if (selector.tagName.toLowerCase() === 'select') {
+            selector.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const priceNGN = selectedOption.dataset.priceNgn;
+                const productId = this.dataset.productId;
+                const priceDisplayElement = document.getElementById(`price-${productId}`);
+                if (priceDisplayElement && priceNGN) {
+                    priceDisplayElement.textContent = `₦${priceNGN}`;
+                }
+            });
+        }
+
+        if (selector.options && selector.options.length > 0 && selector.value) {
+            const initialSelectedOption = selector.options[selector.selectedIndex];
+            if (initialSelectedOption && initialSelectedOption.dataset.priceNgn) {
+                const initialPrice = initialSelectedOption.dataset.priceNgn;
+                const productId = selector.dataset.productId;
+                const priceDisplay = document.getElementById(`price-${productId}`);
+                if (priceDisplay) {
+                    priceDisplay.textContent = `₦${initialPrice}`;
+                }
+            }
+        }
+    });
+
+    document.querySelectorAll('.btn-add-to-cart').forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault(); 
+            event.stopPropagation();
+
+            const productId = this.dataset.productId;
+            const url = this.dataset.addToCartUrl; 
+            const originalButtonText = this.textContent;
+            const variantSelector = document.getElementById(`variant-selector-${productId}`);
+            let selectedVariantId = null;
+
+            if (variantSelector) {
+                if (variantSelector.tagName.toLowerCase() === 'select') {
+                    if (variantSelector.value) {
+                        selectedVariantId = variantSelector.value;
+                        const selectedOptionElement = variantSelector.options[variantSelector.selectedIndex];
+                        if (selectedOptionElement && selectedOptionElement.disabled) {
+                            if (window.displayGlobalMessageInBase) window.displayGlobalMessageInBase('Selected variant is unavailable.', 'warning'); else alert('Selected variant is unavailable.');
+                            return;
+                        }
+                    } else if (variantSelector.options.length > 0) { 
+                         for(let i=0; i < variantSelector.options.length; i++) {
+                            if (!variantSelector.options[i].disabled) {
+                                selectedVariantId = variantSelector.options[i].value;
+                                break;
+                            }
+                        }
+                    }
+                } else if (variantSelector.tagName.toLowerCase() === 'input' && variantSelector.type === 'hidden' && variantSelector.value) {
+                    selectedVariantId = variantSelector.value;
+                }
+            }
+            
+            if (variantSelector && !selectedVariantId && variantSelector.options && variantSelector.options.length > 0) {
+                if (window.displayGlobalMessageInBase) displayGlobalMessageInBase('Please select an available product variant.', 'warning'); else alert('Please select an available product variant.');
+                return; 
+            }
+            
+            if (!csrfToken) {
+                if (window.displayGlobalMessageInBase) displayGlobalMessageInBase('Unable to process request. Please refresh and try again.', 'error'); else alert('Unable to process request. Please refresh and try again.');
+                return;
+            }
+
+            this.disabled = true; this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...';
+            const formData = new FormData();
+            formData.append('quantity', '1'); 
+            if (selectedVariantId) { 
+                formData.append('selected_variant_id', selectedVariantId); 
+            }
+
+            fetch(url, { 
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            })
+            .then(response => {
+                if (response.status === 401) { 
+                    return response.json().then(data => {
+                        if (data && data.status === 'login_required' && data.login_url) {
+                            if (window.displayGlobalMessageInBase) window.displayGlobalMessageInBase(data.message || 'Please sign in to continue.', 'info'); else alert(data.message || 'Please sign in to continue.');
+                            window.location.href = data.login_url; 
+                        } else {
+                            if (window.displayGlobalMessageInBase) window.displayGlobalMessageInBase('Authentication required.', 'error'); else alert('Authentication required.');
+                        }
+                        throw new Error('Login required'); 
+                    }).catch(() => {
+                        if (window.displayGlobalMessageInBase) window.displayGlobalMessageInBase('Authentication required. Please sign in.', 'info'); else alert('Authentication required. Please sign in.');
+                        let nextUrlFallback = encodeURIComponent(window.location.pathname + window.location.search);
+                        window.location.href = `{% url 'login' %}?next=${nextUrlFallback}`;
+                        throw new Error('Login required');
+                    });
+                }
+                if (!response.ok) { 
+                    return response.json().then(errData => { throw { serverError: true, data: errData, status: response.status }; })
+                                         .catch(() => { throw { serverError: false, message: `HTTP error ${response.status}` }; });
+                }
+                return response.json(); 
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    if (window.displayGlobalMessageInBase) window.displayGlobalMessageInBase(data.message || 'Item added to cart!', 'success'); else alert(data.message || 'Item added to cart!');
+                    if (typeof data.cart_total_items !== 'undefined' && window.updateHeaderCartCount) {
+                        window.updateHeaderCartCount(data.cart_total_items);
+                    }
+                } else { 
+                    if (window.displayGlobalMessageInBase) window.displayGlobalMessageInBase(data.message || 'Could not add item to cart.', 'error'); else alert(data.message || 'Could not add item to cart.');
+                }
+            })
+            .catch(error => {
+                if (error.message !== 'Login required') { 
+                    console.error('AJAX Error (Product List):', error);
+                    let errorMsg = 'An error occurred. Please try again.';
+                    if (error.serverError && error.data && error.data.message) errorMsg = error.data.message;
+                    else if (error.message) errorMsg = error.message;
+                    if (window.displayGlobalMessageInBase) window.displayGlobalMessageInBase(errorMsg, 'error'); else alert(errorMsg);
+                }
+            })
+            .finally(() => { 
+                this.disabled = false; 
+                this.innerHTML = originalButtonText; 
+            });
+        });
+    });
+});
+</script>
+{% endblock extra_script %}
