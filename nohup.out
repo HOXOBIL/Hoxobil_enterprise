@@ -4679,3 +4679,15 @@ warning: in the working copy of 'nohup.out', LF will be replaced by CRLF the nex
 📦 Committing: Auto-commit on 2025-05-18 16:45:16
 [main e9cb333] Auto-commit on 2025-05-18 16:45:16
  1 file changed, 7 insertions(+)
+To https://github.com/HOXOBIL/Hoxobil_enterprise.git
+   3746a62..e9cb333  main -> main
+✅ Synced! Waiting 5 seconds...
+warning: in the working copy of 'nohup.out', LF will be replaced by CRLF the next time Git touches it
+📦 Committing: Auto-commit on 2025-05-18 16:46:02
+[main c1acc40] Auto-commit on 2025-05-18 16:46:02
+ 1 file changed, 7 insertions(+)
+      0 [main] mktemp (14988) child_copy: cygheap read copy failed, 0x0..0x80000D338, done 0, windows pid 14988, Win32 error 299
+      0 [main] sh 7523 dofork: child -1 - forked process 26252 died unexpectedly, retry 0, exit code 0xC000012D, errno 11
+c:\Users\yanex\AppData\Local\Programs\Microsoft VS Code\resources\app\extensions\git\dist\askpass.sh: fork: retry: Resource temporarily unavailable
+Missing or invalid credentials.
+Missing pipe

@@ -7,43 +7,134 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token }}">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --header-bg: #0d1117; /* GitHub dark header */
+            --header-text: #c9d1d9;
+            --header-text-hover: #ffffff;
+            --header-accent: #58a6ff; /* GitHub blue */
+            --footer-bg: #0a0f1f; /* Slightly darker for footer */
+            --footer-text: #8b949e;
+            --footer-link-hover: #b0c0d0;
+            --body-bg: #0d1117; /* Default body background if not overridden by page */
+            --body-text: #e0e5f0;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* Tailwind classes will handle most body styling e.g., class="bg-gray-100" on body tag */
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg);
+            color: var(--body-text);
             display: flex;
             flex-direction: column;
-            min-height: 100vh; /* Ensures footer sticks to bottom */
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth theme transitions */
         }
-        /* Minimal shared styles for Django messages */
+
+        /* Header Styles */
+        .hoxobil-header {
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            transition: background-color 0.3s ease;
+        }
+        .hoxobil-header .logo-link img {
+            height: 3.5rem; /* Increased logo size (56px) */
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+        .hoxobil-header .logo-link:hover img {
+            transform: scale(1.05);
+        }
+        .hoxobil-header .logo-text-fallback {
+            color: var(--header-text);
+            font-size: 2rem; /* Increased fallback text size */
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .hoxobil-header .logo-text-fallback .accent {
+            color: var(--header-accent);
+        }
+        .hoxobil-header .nav-link {
+            color: var(--header-text);
+            transition: color 0.2s ease, background-color 0.2s ease;
+            padding: 0.5rem 0.75rem; /* Tailwind's px-3 py-2 */
+            border-radius: 0.375rem; /* Tailwind's rounded-md */
+            font-weight: 500; /* Tailwind's font-medium */
+        }
+        .hoxobil-header .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--header-text-hover);
+        }
+        .hoxobil-header .nav-link.active {
+            background-color: var(--header-accent);
+            color: var(--header-bg); /* Contrast for active link */
+            font-weight: 600;
+        }
+        .hoxobil-header .cart-link {
+            color: var(--header-text);
+            transition: color 0.2s ease;
+            position: relative;
+        }
+        .hoxobil-header .cart-link:hover {
+            color: var(--header-accent);
+        }
+        .hoxobil-header .cart-count-badge {
+            background-color: var(--header-accent);
+            color: var(--header-bg);
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+            position: absolute;
+            top: -4px;
+            right: -8px;
+            border-radius: 9999px;
+            font-weight: 700;
+            border: 1px solid var(--header-bg);
+        }
+        .hoxobil-header #mobile-menu-button {
+            color: var(--header-text);
+        }
+        .hoxobil-header #mobile-menu-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--header-text-hover);
+        }
+        .hoxobil-header #mobile-menu {
+            background-color: var(--header-bg); /* Ensure mobile menu has same bg */
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Global Messages Styling */
         .alert-message { 
-            padding: 0.75rem 1.25rem; 
-            margin-bottom: 1rem; 
-            border-radius: 0.375rem; /* rounded-md */
+            padding: 1rem 1.5rem; 
+            margin-bottom: 1.25rem; 
+            border-radius: 0.5rem; 
             font-weight: 500;
+            border-width: 1px;
+            border-style: solid;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .alert-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-        .alert-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-        .alert-info { background-color: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
-        .alert-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .alert-error   { background-color: #2c1d27; color: #ff80ab; border-color: #ff80ab; } /* Pinkish-red on dark */
+        .alert-success { background-color: #1c2e28; color: #50fa7b; border-color: #50fa7b; } /* Green on dark */
+        .alert-info    { background-color: #1d2a3f; color: #82aaff; border-color: #82aaff; } /* Blue on dark */
+        .alert-warning { background-color: #362f21; color: #f1fa8c; border-color: #f1fa8c; } /* Yellow on dark */
 
         .messages-container-global {
             padding: 0 1rem; 
             margin-top: 1rem; 
             list-style: none; 
             position: fixed;
-            top: 80px; /* Adjusted slightly for potentially taller header */
+            top: 80px; 
             left: 50%;
             transform: translateX(-50%);
-            z-index: 1001; 
+            z-index: 1050; /* Ensure it's above most content, but below modals if any */
             width: auto; 
-            max-width: 90%;
+            max-width: 500px; /* Constrain width */
         }
         .messages-container-global .alert {
-             opacity: 0; 
-             transform: translateY(-20px); 
-             animation: fadeInSlideDown 0.5s forwards;
+            opacity: 0; 
+            transform: translateY(-20px); 
+            animation: fadeInSlideDown 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
         }
         @keyframes fadeInSlideDown { 
             to { 
@@ -51,53 +142,88 @@
                 transform: translateY(0); 
             } 
         }
+        @keyframes fadeOutSlideUp { 
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+
+        /* Footer Styles */
+        .hoxobil-footer {
+            background-color: var(--footer-bg);
+            color: var(--footer-text);
+            padding: 3rem 1.5rem;
+            text-align: center;
+            margin-top: auto; /* Pushes footer to bottom */
+            border-top: 1px solid #1c2333; /* Subtle top border */
+        }
+        .hoxobil-footer p {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .hoxobil-footer a {
+            color: var(--footer-text);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .hoxobil-footer a:hover {
+            color: var(--footer-link-hover);
+            text-decoration: underline;
+        }
+        .footer-slogan {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--header-accent);
+            letter-spacing: 0.05em;
+            margin-top: 0.25rem;
+            opacity: 0.8;
+        }
     </style>
     {% block extra_head %}{% endblock extra_head %} 
 </head>
-<body class="bg-gray-100 text-gray-800"> 
+<body class="flex flex-col min-h-screen"> 
 
-    <header class="bg-black text-white shadow-md sticky top-0 z-50">
+    <header class="hoxobil-header sticky top-0 z-50">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
+            <div class="flex items-center justify-between h-24"> {/* Increased header height */}
                 <div class="flex-shrink-0">
-                    <a href="{% url 'home' %}" class="flex items-center">
-                        <img class="h-12 w-auto sm:h-14" src="{% static 'images/logo/main_logo.png' %}" alt="HOXOBIL Logo"
+                    <a href="{% url 'home' %}" class="flex items-center logo-link">
+                        <img src="{% static 'images/logo/main_logo.png' %}" alt="HOXOBIL Logo"
                              id="header-logo-image" 
                              onerror="handleLogoError(this);">
-                        <span id="logo-text-fallback-header" style="display:none; color: #fff; font-size: 1.8rem; font-weight: bold; letter-spacing: 1px;">HOXO<span class="text-blue-500">BIL</span></span>
+                        <span id="logo-text-fallback-header" class="logo-text-fallback" style="display:none;">HOXO<span class="accent">BIL</span></span>
                     </a>
                 </div>
 
-                <nav class="hidden md:flex space-x-2 lg:space-x-4 items-center">
-                    <a href="{% url 'home' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'home' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Home</a>
-                    <a href="{% url 'product_list' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'product_list' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Products</a>
-                    <a href="{% url 'competition_page' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'competition_page' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Competition</a>
+                <nav class="hidden md:flex space-x-3 lg:space-x-5 items-center">
+                    <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+                    <a href="{% url 'product_list' %}" class="nav-link {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">Products</a>
+                    <a href="{% url 'competition_page' %}" class="nav-link {% if request.resolver_match.url_name == 'competition_page' %}active{% endif %}">Competition</a>
                     
                     {% if user.is_authenticated %}
-                        <a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Account</a> {# TODO: Link to actual account page #}
-                        <a href="{% url 'logout' %}" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Logout</a>
+                        <a href="#" class="nav-link">My Account</a> {# TODO: Link to actual account page #}
+                        <a href="{% url 'logout' %}" class="nav-link">Logout</a>
                     {% else %}
-                        <a href="{% url 'login' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'login' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Sign In</a>
-                        <a href="{% url 'signup' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'signup' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Sign Up</a>
+                        <a href="{% url 'login' %}" class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}">Sign In</a>
+                        <a href="{% url 'signup' %}" class="nav-link {% if request.resolver_match.url_name == 'signup' %}active{% endif %}">Sign Up</a>
                     {% endif %}
-                    <a href="{% url 'view_cart' %}" class="ml-4 p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white flex items-center cart-link" aria-label="View Shopping Cart">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <a href="{% url 'view_cart' %}" class="ml-4 p-2 rounded-md cart-link focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white flex items-center" aria-label="View Shopping Cart">
+                        <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
-                        <span class="ml-2 text-sm font-medium bg-blue-500 text-white rounded-full px-2 py-0.5" id="cart-count-badge">
+                        <span class="cart-count-badge" id="cart-count-badge">
                             {% if request.session.cart and request.session.cart|length > 0 %}{{ request.session.cart|length }}{% else %}0{% endif %}
                         </span>
                     </a>
                 </nav>
 
                 <div class="md:hidden flex items-center">
-                    <a href="{% url 'view_cart' %}" class="mr-2 p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white flex items-center cart-link-mobile" aria-label="View Shopping Cart">
+                    <a href="{% url 'view_cart' %}" class="mr-2 p-2 rounded-md cart-link-mobile focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white flex items-center" aria-label="View Shopping Cart">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                        <span class="ml-1 text-sm font-medium bg-blue-500 text-white rounded-full px-1.5 py-0.5" id="cart-count-badge-mobile">
+                        <span class="cart-count-badge" id="cart-count-badge-mobile">
                              {% if request.session.cart and request.session.cart|length > 0 %}{{ request.session.cart|length }}{% else %}0{% endif %}
                         </span>
                     </a>
-                    <button id="mobile-menu-button" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
+                    <button id="mobile-menu-button" type="button" class="inline-flex items-center justify-center p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
                         <span class="sr-only">Open main menu</span>
                         <svg class="block h-6 w-6" id="menu-icon-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                         <svg class="hidden h-6 w-6" id="menu-icon-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -108,24 +234,24 @@
 
         <div class="md:hidden hidden" id="mobile-menu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="{% url 'home' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'home' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Home</a>
-                <a href="{% url 'product_list' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'product_list' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Products</a>
-                <a href="{% url 'competition_page' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'competition_page' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Competition</a>
+                <a href="{% url 'home' %}" class="nav-link block {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+                <a href="{% url 'product_list' %}" class="nav-link block {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">Products</a>
+                <a href="{% url 'competition_page' %}" class="nav-link block {% if request.resolver_match.url_name == 'competition_page' %}active{% endif %}">Competition</a>
                  {% if user.is_authenticated %}
-                    <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Account</a>
-                    <a href="{% url 'logout' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Logout</a>
+                    <a href="#" class="nav-link block">My Account</a>
+                    <a href="{% url 'logout' %}" class="nav-link block">Logout</a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'login' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Sign In</a>
-                    <a href="{% url 'signup' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'signup' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Sign Up</a>
+                    <a href="{% url 'login' %}" class="nav-link block {% if request.resolver_match.url_name == 'login' %}active{% endif %}">Sign In</a>
+                    <a href="{% url 'signup' %}" class="nav-link block {% if request.resolver_match.url_name == 'signup' %}active{% endif %}">Sign Up</a>
                 {% endif %}
-                <a href="{% url 'checkout' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'checkout' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Checkout</a>
-                 <a href="{% url 'privacy_policy' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'privacy_policy' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Privacy Policy</a>
-                  <a href="{% url 'terms_of_service' %}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700 {% if request.resolver_match.url_name == 'terms_of_service' %}bg-gray-900 text-white{% else %}text-gray-300{% endif %}">Terms of Service</a>
+                <a href="{% url 'checkout' %}" class="nav-link block {% if request.resolver_match.url_name == 'checkout' %}active{% endif %}">Checkout</a>
+                <a href="{% url 'privacy_policy' %}" class="nav-link block {% if request.resolver_match.url_name == 'privacy_policy' %}active{% endif %}">Privacy Policy</a>
+                <a href="{% url 'terms_of_service' %}" class="nav-link block {% if request.resolver_match.url_name == 'terms_of_service' %}active{% endif %}">Terms of Service</a>
             </div>
         </div>
     </header>
 
-    <main class="flex-1"> {# Changed from flex-grow for Tailwind consistency #}
+    <main class="flex-1"> 
         <div class="messages-container-global" id="messages-container-dynamic-global">
             {% if messages %}
                 {% for message in messages %}
@@ -135,29 +261,28 @@
                 {% endfor %}
             {% endif %}
         </div>
-        {% block content %}
-        {% endblock content %}
+        {% block content %}{% endblock content %}
     </main>
 
-    <footer class="bg-gray-800 text-gray-400 py-10 text-center mt-auto">
+    <footer class="hoxobil-footer">
         <div class="container mx-auto px-6">
-            <p>&copy; {% now "Y" %} HOXOBIL. All rights reserved. Unleashing Perfection</p>
-            <p class="mt-2">
-                <a href="{% url 'privacy_policy' %}" class="hover:text-white">Privacy Policy</a> | 
-                <a href="{% url 'terms_of_service' %}" class="hover:text-white">Terms of Service</a> 
+            <p>&copy; {% now "Y" %} HOXOBIL. All rights reserved.</p>
+            <p class="footer-slogan">Unleashing Perfection</p>
+            <p class="mt-4">
+                <a href="{% url 'privacy_policy' %}">Privacy Policy</a> | 
+                <a href="{% url 'terms_of_service' %}">Terms of Service</a> 
             </p>
-        </div>
+            </div>
     </footer>
 
 <script>
-// Placed the function definition in the global scope so it's available for img onerror
 function handleLogoError(imgElement) {
     if (imgElement && imgElement instanceof HTMLElement) {
         imgElement.style.display = 'none';
     }
     const fallbackTextElement = document.getElementById('logo-text-fallback-header');
     if (fallbackTextElement && fallbackTextElement instanceof HTMLElement) {
-        fallbackTextElement.style.display = 'inline'; // Or 'block' if you prefer
+        fallbackTextElement.style.display = 'inline';
     }
 }
 
@@ -169,34 +294,33 @@ document.addEventListener('DOMContentLoaded', function () {
     const cartCountBadge = document.getElementById('cart-count-badge'); 
     const cartCountBadgeMobile = document.getElementById('cart-count-badge-mobile'); 
 
-    if (mobileMenuButton && menuIconOpen && menuIconClosed && mobileMenu) { // Check all elements exist
+    if (mobileMenuButton && menuIconOpen && menuIconClosed && mobileMenu) {
         mobileMenuButton.addEventListener('click', function () {
             const isCurrentlyHidden = mobileMenu.classList.contains('hidden');
             mobileMenu.classList.toggle('hidden', !isCurrentlyHidden);
             menuIconOpen.classList.toggle('hidden', isCurrentlyHidden);
             menuIconClosed.classList.toggle('hidden', !isCurrentlyHidden);
-            this.setAttribute('aria-expanded', isCurrentlyHidden);
+            this.setAttribute('aria-expanded', String(!isCurrentlyHidden)); // Ensure boolean is string
         });
     }
 
     window.updateHeaderCartCount = function(count) {
+        const countStr = String(count);
         if (cartCountBadge) {
-            cartCountBadge.textContent = count;
+            cartCountBadge.textContent = countStr;
         }
         if (cartCountBadgeMobile) {
-            cartCountBadgeMobile.textContent = count;
+            cartCountBadgeMobile.textContent = countStr;
         }
     };
     
     const logoImageElement = document.getElementById('header-logo-image'); 
     if (logoImageElement) {
-        // The onerror attribute on the img tag will call the globally defined handleLogoError
-        // Additional check for already broken images on page load
         if (!logoImageElement.complete || (typeof logoImageElement.naturalWidth !== "undefined" && logoImageElement.naturalWidth === 0)) {
             if (logoImageElement.src && logoImageElement.src !== window.location.href) { 
-                 if (typeof handleLogoError === 'function') { 
+                if (typeof handleLogoError === 'function') { 
                     handleLogoError(logoImageElement);
-                 }
+                }
             }
         }
     }
@@ -209,8 +333,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 initialMessages.forEach(msg => {
                     if (msg.parentNode) { 
                         const fadeOutAnimation = document.querySelector('style[data-animation="fade-out"]');
-                        if (fadeOutAnimation || (msg.style.animation && msg.style.animation.includes('fadeOut'))) {
-                            msg.style.animation = 'fadeOut 0.5s forwards'; 
+                        if (fadeOutAnimation || (msg.style.animation && msg.style.animation.includes('fadeOutSlideUp'))) { // Changed animation name
+                            msg.style.animation = 'fadeOutSlideUp 0.5s forwards'; 
                             setTimeout(() => {
                                 if (msg.parentNode) msg.remove();
                             }, 500);
@@ -227,11 +351,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const styleSheetFadeOut = document.createElement("style");
         styleSheetFadeOut.dataset.animation = "fade-out"; 
         styleSheetFadeOut.type = "text/css";
-        styleSheetFadeOut.innerText = "@keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }";
+        styleSheetFadeOut.innerText = "@keyframes fadeOutSlideUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }";
         document.head.appendChild(styleSheetFadeOut);
     }
 
-    // Function to be called by child templates if they want to display a global message
     window.displayGlobalMessageInBase = function(message, type = 'info') {
         if (!globalMessagesContainer) return;
         const alertDiv = document.createElement('div');
@@ -239,23 +362,21 @@ document.addEventListener('DOMContentLoaded', function () {
         alertDiv.setAttribute('role', 'alert');
         alertDiv.textContent = message;
         
-        // Clear previous dynamic messages before adding a new one
         const dynamicMessages = globalMessagesContainer.querySelectorAll('.alert[data-dynamic="true"]');
         dynamicMessages.forEach(dm => dm.remove());
 
-        alertDiv.dataset.dynamic = "true"; // Mark as a dynamic message
+        alertDiv.dataset.dynamic = "true"; 
         globalMessagesContainer.appendChild(alertDiv);
 
         setTimeout(() => {
             if (alertDiv.parentNode) { 
-                alertDiv.style.animation = 'fadeOut 0.5s forwards';
+                alertDiv.style.animation = 'fadeOutSlideUp 0.5s forwards';
                 setTimeout(() => {
                    if (alertDiv.parentNode) alertDiv.remove();
                 }, 500);
             }
-        }, 3000); // Auto-clear dynamically added messages
+        }, 3000); 
     };
-
 });
 </script>
 {% block extra_script %}{% endblock extra_script %}
