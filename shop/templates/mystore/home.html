@@ -1,83 +1,164 @@
 {% extends "mystore/base.html" %}
 {% load static %}
 
-{% block title %}HOXOBIL - Unleashing Perfection Together{% endblock title %}
+{% block title %}HOXOBIL - Unleashing Perfection{% endblock title %}
 
 {% block extra_head %}
-    {# Styles specific to home.html hero, team sections #}
     <style>
         .hero { 
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            min-height: 85vh; text-align: center; padding: 3rem 2rem; color: #fff; 
-            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{% static "images/logo/o.png" %}'); /* Ensure this path is correct */
-            background-size: cover; background-position: center center; background-attachment: fixed; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
+            min-height: 85vh; 
+            text-align: center; 
+            padding: 3rem 2rem; 
+            color: #fff; 
+            /* Consider a more generic or thematic background image for the homepage hero */
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{% static "images/backgrounds/hero_bg_placeholder.jpg" %}'); /* Replace with your actual hero background */
+            background-size: cover; 
+            background-position: center center; 
+            background-attachment: fixed; 
         }
-        .hero h1 { font-size: 3.5rem; margin-bottom: 0.5rem; font-weight: 700; text-shadow: 2px 2px 8px rgba(0,0,0,0.5); }
-        .hero .slogan { font-size: 1.8rem; font-weight: 500; margin-bottom: 1.5rem; color: #e0e0e0; text-shadow: 1px 1px 6px rgba(0,0,0,0.5); }
-        .hero .sub-text { font-size: 1.2rem; margin-bottom: 2.5rem; color: #d0d0d0; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .hero h1 { 
+            font-size: 3.5rem; 
+            margin-bottom: 0.5rem; 
+            font-weight: 700; 
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5); 
+        }
+        .hero .slogan { 
+            font-size: 1.8rem; 
+            font-weight: 500; 
+            margin-bottom: 1.5rem; 
+            color: #e0e0e0; 
+            text-shadow: 1px 1px 6px rgba(0,0,0,0.5); 
+        }
+        .hero .sub-text { 
+            font-size: 1.2rem; 
+            margin-bottom: 2.5rem; 
+            color: #d0d0d0; 
+            max-width: 600px; 
+            margin-left: auto; 
+            margin-right: auto; 
+        }
         
         .btn.hero-btn { 
-            padding: 0.9rem 2.2rem; background: #007bff; color: #fff; text-decoration: none;
-            border-radius: 0.5rem; font-weight: 600; font-size: 1.05rem;
+            padding: 0.9rem 2.2rem; 
+            background: #007bff; /* Consider using your brand's primary color */
+            color: #fff; 
+            text-decoration: none;
+            border-radius: 0.5rem; 
+            font-weight: 600; 
+            font-size: 1.05rem;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+            border: none;
         }
-        .btn.hero-btn:hover { background: #0056b3; transform: translateY(-2px); }
+        .btn.hero-btn:hover { 
+            background: #0056b3; /* Darker shade for hover */
+            transform: translateY(-2px); 
+        }
 
-        .content-section { padding: 4rem 2rem; text-align: center; }
-        .content-section.bg-white { background-color: #fff; }
-        .content-section.bg-light { background-color: #f8f9fa; } 
+        .content-section { 
+            padding: 4rem 2rem; 
+            text-align: center; 
+        }
+        .content-section.bg-white { 
+            background-color: #fff; 
+        }
+        .content-section.bg-light { 
+            background-color: #f8f9fa; 
+        } 
         
-        .section-title { font-size: 2.5rem; margin-bottom: 1rem; color: #1f2937; font-weight: 600; position: relative; display: inline-block; }
-        .section-title::after { content: ''; display: block; width: 60px; height: 3px; background-color: #2563eb; margin: 0.5rem auto 2rem auto; }
+        .section-title { 
+            font-size: 2.5rem; 
+            margin-bottom: 1rem; 
+            color: #1f2937; 
+            font-weight: 600; 
+            position: relative; 
+            display: inline-block; 
+        }
+        .section-title::after { 
+            content: ''; 
+            display: block; 
+            width: 60px; 
+            height: 3px; 
+            background-color: #2563eb; /* Tailwind blue-600, consider brand color */
+            margin: 0.5rem auto 2rem auto; 
+        }
         
-        .team-section { padding: 3rem 1rem; }
-        .team-section h2.main-team-title { font-size: 2.5rem; margin-bottom: 2.5rem; color: #1f2937; font-weight: 600; text-align: center; }
+        .team-section { 
+            padding: 3rem 1rem; 
+            background-color: #f9fafb; /* Light gray background for team section */
+        }
+        .team-section h2.main-team-title { 
+            font-size: 2.5rem; 
+            margin-bottom: 2.5rem; 
+            color: #1f2937; 
+            font-weight: 600; 
+            text-align: center; 
+        }
         
-        /* Styles for team sections */
-        .team-category-title { font-size: 1.8rem; font-weight: 600; color: #374151; margin-top: 3rem; margin-bottom: 1.5rem; text-align: center; }
-        .team-category-title:first-of-type { margin-top: 0; } /* No top margin for the very first category title if it's the start of the section */
+        .team-category-title { 
+            font-size: 1.8rem; 
+            font-weight: 600; 
+            color: #374151; 
+            margin-top: 3rem; 
+            margin-bottom: 1.5rem; 
+            text-align: center; 
+        }
+        .team-category-title:first-of-type { 
+            margin-top: 0; 
+        }
 
-        .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; max-width: 1100px; margin-left: auto; margin-right: auto; }
+        .team-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 2rem; 
+            max-width: 1100px; 
+            margin-left: auto; 
+            margin-right: auto; 
+        }
         
         .team-member { 
             background: #fff; 
             padding: 1.5rem; 
-            border-radius: 0.5rem; /* rounded-lg */
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); /* shadow-md */
+            border-radius: 0.5rem; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); 
             transition: transform 0.3s ease, box-shadow 0.3s ease; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
+            text-align: center; /* Ensure text inside is centered */
         }
         .team-member:hover { 
             transform: translateY(-5px); 
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); /* shadow-xl */
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); 
         }
-        .team-member img.team-photo { /* Unified class for team photos */
+        .team-member img.team-photo { 
             width: 150px; 
             height: 150px; 
-            border-radius: 9999px; /* rounded-full */
+            border-radius: 50%; /* Changed from 9999px for clarity */
             object-fit: cover; 
             margin-bottom: 1rem; 
-            border: 4px solid #2563eb; /* Tailwind blue-600 */
+            border: 4px solid #2563eb; 
         }
         .team-member h3 { 
             font-size: 1.4rem; 
             margin-bottom: 0.5rem; 
-            color: #1f2937; /* gray-800 */
+            color: #1f2937; 
         }
         .team-member .role { 
             font-size: 1rem; 
-            color: #2563eb; /* blue-600 */
+            color: #2563eb; 
             margin-bottom: 0.75rem; 
-            font-weight: 500; /* font-medium */
+            font-weight: 500; 
         }
         .team-member p.description { 
             font-size: 0.95rem; 
             line-height: 1.6; 
             flex-grow: 1; 
-            color: #4b5563; /* gray-600 */
+            color: #4b5563; 
         }
 
         @media (max-width: 768px) {
@@ -101,61 +182,75 @@
 {% block content %}
     <section class="hero">
         <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight">Welcome to HOXOBIL</h1>
-        <p class="text-xl md:text-3xl font-light mb-6 slogan">Unleashing Perfection.</p> {# Corrected Slogan #}
-        <p class="text-lg md:text-xl mb-10 max-w-3xl mx-auto sub-text">Style redefined. Wear your vibe. Globally inspired.</p> {# Corrected Sub-text #}
+        <p class="text-xl md:text-3xl font-light mb-6 slogan">Unleashing Perfection.</p>
+        <p class="text-lg md:text-xl mb-10 max-w-3xl mx-auto sub-text">Style redefined. Wear your vibe. Globally inspired fashion for the bold and the confident.</p>
         <a href="{% url 'product_list' %}" class="btn hero-btn">Shop Our Collections</a>
     </section>
 
-    {# Removed the separate "Meet the Founder" section as it's now part of "Our Core Team" #}
+    <section id="about-us" class="content-section bg-white">
+        <div class="container mx-auto">
+            <h2 class="section-title">Our Vision</h2>
+            <p class="text-lg text-gray-700 max-w-2xl mx-auto mb-8">
+                At HOXOBIL, we believe fashion is more than just clothing – it's a statement, an art form, a way to express your unique identity. We are dedicated to crafting pieces that embody perfection in design, quality, and style, empowering you to feel confident and exceptional.
+            </p>
+        </div>
+    </section>
 
     <section id="team" class="py-16 team-section">
         <div class="container mx-auto px-6 text-center">
-            <h2 class="team-section-title-competition">Meet the HOXOBIL Team</h2>
+            <h2 class="main-team-title">Meet the HOXOBIL Team</h2>
             
-            <h3 class="team-category-title-competition">Leadership</h3>
-            <div class="team-grid-competition"> 
-                <div class="team-member-competition">
+            <h3 class="team-category-title">Leadership</h3>
+            <div class="team-grid"> 
+                <div class="team-member">
                     <img src="{% static 'images/team_photos/yanex.jpg' %}" 
-                    alt="IBJ IYANUOLUWA - CEO" class="team-member-competition-img">
+                         alt="IBJ IYANUOLUWA - CEO" class="team-photo">
                     <h3>IBJ IYANUOLUWA</h3>
                     <p class="role">CEO & Visionary Director</p>
+                    <p class="description">Leading HOXOBIL with a passion for innovation and a commitment to excellence in fashion.</p>
                 </div>
-                <div class="team-member-competition">
-               <img src="{% static 'images/team_photos/angel.jpg' %}" 
-                     alt="Chidiebere chineze angel - Manager" class="team-member-competition-img">
+                <div class="team-member">
+                    <img src="{% static 'images/team_photos/angel.jpg' %}" 
+                         alt="Chidiebere chineze angel - Manager" class="team-photo">
                     <h3>Chidiebere chineze angel</h3>
                     <p class="role">Manager & Operations Lead</p>
+                    <p class="description">Ensuring the seamless execution of our vision and the highest quality in every piece.</p>
                 </div>
             </div>
 
-            <h3 class="team-category-title-competition">Design Team</h3>
-            <div class="team-grid-competition">
-                <div class="team-member-competition">
-                                  <img src="{% static 'images/team_photos/' %}" 
-                                  alt="Odukoya baseerah - Designer" class="team-member-competition-img">
-                    <h3>Odukoya baseerah</h3>
+            <h3 class="team-category-title">Design Team</h3>
+            <div class="team-grid">
+                <div class="team-member">
+                    <img src="{% static 'images/team_photos/baseerah_placeholder.jpg' %}"  
+                         alt="Odukoya baseerah - Designer" class="team-photo"> 
+                         <h3>Odukoya baseerah</h3>
                     <p class="role">Lead Fashion Designer</p>
+                    <p class="description">Crafting unique and trendsetting designs that define the HOXOBIL aesthetic.</p>
                 </div>
-                <div class="team-member-competition">
-                    <img src="https://placehold.co/120x120/059669/ffffff?text=Des2" alt="Farinto boluwatife - Designer" class="team-member-competition-img">
-                    <h3>Farinto boluwatife</h3>
+                <div class="team-member">
+                    <img src="https://placehold.co/150x150/059669/ffffff?text=Bolu" 
+                         alt="Farinto boluwatife - Designer" class="team-photo">
+                         <h3>Farinto boluwatife</h3>
                     <p class="role">Creative Pattern Maker</p>
+                    <p class="description">Bringing intricate designs to life with precision and artistry in pattern making.</p>
                 </div>
             </div>
 
-            <h3 class="team-category-title-competition">Faces of HOXOBIL (Models)</h3>
-            <div class="team-grid-competition">
-                <div class="team-member-competition">
-               <img src="{% static 'images/team_photos/lemo.jpg' %}" 
-                                 alt="Lemo damilola - Model" class="team-member-competition-img">
+            <h3 class="team-category-title">Faces of HOXOBIL (Models)</h3>
+            <div class="team-grid">
+                <div class="team-member">
+                    <img src="{% static 'images/team_photos/lemo.jpg' %}" 
+                         alt="Lemo damilola - Model" class="team-photo">
                     <h3>Lemo damilola</h3>
                     <p class="role">Brand Model</p>
+                    <p class="description">Embodying the spirit and style of HOXOBIL in every campaign and showcase.</p>
                 </div>
-                <div class="team-member-competition">
-               <img src="{% static 'images/team_photos/fade.jpg' %}" 
-                                   alt="Aderemi faderera - Model" class="team-member-competition-img">
+                <div class="team-member">
+                    <img src="{% static 'images/team_photos/fade.jpg' %}" 
+                         alt="Aderemi faderera - Model" class="team-photo">
                     <h3>Aderemi faderera</h3>
                     <p class="role">Brand Model</p>
+                    <p class="description">Showcasing the versatility and elegance of HOXOBIL designs to the world.</p>
                 </div>
             </div>
         </div>
@@ -165,3 +260,4 @@
 {% block extra_script %}
     {# Add any page-specific JavaScript for home.html here if needed #}
 {% endblock extra_script %}
+he
