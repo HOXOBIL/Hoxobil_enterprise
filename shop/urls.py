@@ -68,4 +68,16 @@ urlpatterns = [
     ), name='password_reset_complete'),
 
     path('api/submit-custom-design/', views.submit_custom_design, name='submit_custom_design'),
+
+
+
+
+
+
+
+
+
+
+        path('test-page/', views.test_page_view, name='test_page'),
+
 ]
