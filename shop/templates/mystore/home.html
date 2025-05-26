@@ -42,6 +42,13 @@
             margin-right: auto; 
         }
         
+        .hero .hero-buttons-container { /* New container for buttons */
+            display: flex;
+            gap: 1.5rem; /* Space between buttons */
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            justify-content: center;
+        }
+
         .btn.hero-btn { 
             padding: 0.9rem 2.2rem; 
             background: #007bff; /* Consider using your brand's primary color */
@@ -58,6 +65,15 @@
             background: #0056b3; /* Darker shade for hover */
             transform: translateY(-2px); 
         }
+
+        /* Styling for the new customizer button, if different */
+        .btn.hero-btn.customizer-btn {
+            background: linear-gradient(45deg, #00e5ff, #9e00ff); /* Using your accent colors */
+        }
+        .btn.hero-btn.customizer-btn:hover {
+            background: linear-gradient(45deg, #9e00ff, #00e5ff); /* Reverse gradient on hover */
+        }
+
 
         .content-section { 
             padding: 4rem 2rem; 
@@ -169,6 +185,10 @@
             .section-title, .team-section h2.main-team-title { font-size: 2rem; }
             .team-category-title { font-size: 1.5rem; }
             .team-member img.team-photo { width: 120px; height: 120px; }
+            .hero .hero-buttons-container {
+                flex-direction: column; /* Stack buttons vertically on small screens */
+                gap: 1rem;
+            }
         }
         @media (max-width: 480px) {
             .hero h1 { font-size: 2.2rem; }
@@ -184,7 +204,17 @@
         <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight">Welcome to HOXOBIL</h1>
         <p class="text-xl md:text-3xl font-light mb-6 slogan">Unleashing Perfection.</p>
         <p class="text-lg md:text-xl mb-10 max-w-3xl mx-auto sub-text">Style redefined. Wear your vibe. Globally inspired fashion for the bold and the confident.</p>
-        <a href="{% url 'product_list' %}" class="btn hero-btn">Shop Our Collections</a>
+        
+        <div class="hero-buttons-container">
+            <a href="{% url 'product_list' %}" class="btn hero-btn">Shop Our Collections</a>
+            {# --- NEW: Link to Product Customizer --- #}
+            {# IMPORTANT: Replace '1' with an actual product ID from your database that you want to be customizable. #}
+            {# This should be a product that has a mockup_image defined in your Django admin. #}
+            <a href="{% url 'product_customizer' product_id=1 %}" class="btn hero-btn customizer-btn">
+                Create Your Custom Design
+            </a>
+            {# --- END NEW LINK --- #}
+        </div>
     </section>
 
     <section id="about-us" class="content-section bg-white">
@@ -221,7 +251,7 @@
             <h3 class="team-category-title">Design Team</h3>
             <div class="team-grid">
                 <div class="team-member">
-                    <img src="{% static 'images/team_photos/baseerah_placeholder.jpg' %}"  
+                    <img src="{% static 'images/team_photos/baseerah_placeholder.jpg' %}" 
                          alt="Odukoya baseerah - Designer" class="team-photo"> 
                          <h3>Odukoya baseerah</h3>
                     <p class="role">Lead Fashion Designer</p>
@@ -260,4 +290,3 @@
 {% block extra_script %}
     {# Add any page-specific JavaScript for home.html here if needed #}
 {% endblock extra_script %}
-he
