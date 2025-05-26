@@ -1155,7 +1155,7 @@ def add_to_cart_custom_design_ajax(request):
 
 
 
-
+ 
         def test_page_view(request):
             
             """
