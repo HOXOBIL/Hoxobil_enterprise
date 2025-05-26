@@ -1,0 +1,787 @@
+{% extends "mystore/base.html" %}
+{% load static %}
+
+{% block title %}HOXOBIL - Customize Your Product{% endblock title %}
+
+{% block extra_head %}
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+
+    {# Safely pass JSON data from Django to JavaScript using json_script #}
+    {# These script tags will contain the JSON data as plain text content, accessible by their ID #}
+    {{ product.variants_data|json_script:"product-variants-data" }}
+    {{ product.product_options_data|json_script:"product-options-data" }}
+
+    <style>
+        /* General styling from your products.html for consistency */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Roboto+Mono:wght@400;700&family=Orbitron:wght@700&display=swap');
+
+        :root {
+            --bg-color: #0a0f1f;
+            --card-bg-color: rgba(20, 30, 55, 0.7);
+            --primary-accent-color: #00e5ff;
+            --secondary-accent-color: #9e00ff;
+            --text-color-light: #e0e5f0;
+            --text-color-dark: #1a202c;
+            --border-color: rgba(0, 229, 255, 0.3);
+            --button-bg: linear-gradient(45deg, var(--primary-accent-color), var(--secondary-accent-color));
+            --button-hover-bg: linear-gradient(45deg, var(--secondary-accent-color), var(--primary-accent-color));
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color-light);
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            position: relative;
+            z-index: 1; /* Keep content above flying text */
+        }
+
+        .page-header {
+            text-align: center;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            color: #ffffff;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-shadow: 0 0 15px var(--primary-accent-color);
+            margin-bottom: 0.75rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.15rem;
+            color: #b0c0d0;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 300;
+        }
+
+        .design-area-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            align-items: flex-start;
+            margin-top: 2rem;
+        }
+
+        .design-canvas-container {
+            background-color: rgba(20, 30, 55, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden; /* Ensure design stays within bounds */
+            flex: 1 1 500px; /* Adjust width as needed */
+            min-width: 300px;
+            max-width: 600px;
+        }
+
+        canvas {
+            border: 1px dashed var(--primary-accent-color); /* To visualize the canvas area */
+            background-color: #2a3b5a; /* A darker background for visibility */
+            display: block; /* Remove extra space below canvas */
+            margin: 0 auto;
+        }
+
+        #product-mockup {
+            position: absolute;
+            top: 1.5rem; /* Match padding of container */
+            left: 1.5rem; /* Match padding of container */
+            width: calc(100% - 3rem); /* Adjust for padding */
+            height: calc(100% - 3rem); /* Adjust for padding */
+            object-fit: contain; /* Ensure the mockup fits */
+            z-index: 0; /* Behind design elements */
+            opacity: 0.2; /* Subtly show the mockup */
+            pointer-events: none; /* Don't interfere with canvas interactions */
+        }
+
+        .controls-panel {
+            background-color: rgba(20, 30, 55, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            padding: 1.5rem;
+            flex: 1 1 300px; /* Adjust width as needed */
+            min-width: 280px;
+        }
+
+        .controls-panel h3 {
+            color: var(--primary-accent-color);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: var(--text-color-light);
+            font-size: 0.95rem;
+        }
+
+        .control-group input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: rgba(10, 15, 30, 0.8);
+            color: var(--text-color-light);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .control-group input[type="file"]::-webkit-file-upload-button {
+            background: var(--button-bg);
+            color: #ffffff;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .control-group input[type="file"]::-webkit-file-upload-button:hover {
+            background: var(--button-hover-bg);
+        }
+
+        .control-group input[type="text"],
+        .control-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: rgba(10, 15, 30, 0.8);
+            color: var(--text-color-light);
+            font-size: 0.9rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            appearance: none; /* Remove default select arrow */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e0e5f0'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px;
+        }
+
+        .control-group input[type="number"] {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: rgba(10, 15, 30, 0.8);
+            color: var(--text-color-light);
+            font-size: 0.9rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .control-group input[type="text"]:focus,
+        .control-group select:focus,
+        .control-group input[type="number"]:focus,
+        .control-group input[type="file"]:focus {
+            outline: none;
+            border-color: var(--primary-accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.25);
+        }
+
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 0;
+            overflow: hidden; /* Hide the default border */
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: 1px solid var(--border-color);
+            border-radius: 8px; /* Match the border-radius of other inputs */
+        }
+
+        input[type="color"]::-moz-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-moz-color-swatch {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .btn-submit-design {
+            background: var(--button-bg);
+            color: #ffffff;
+            border: none;
+            padding: 0.9rem 1.5rem;
+            text-align: center;
+            text-decoration: none;
+            display: block; /* Make it full width */
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.2), 0 2px 8px rgba(158, 0, 255, 0.15);
+        }
+        .btn-submit-design:hover {
+            background: var(--button-hover-bg);
+            box-shadow: 0 7px 20px rgba(0, 229, 255, 0.3), 0 3px 10px rgba(158, 0, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        .btn-submit-design:active {
+            transform: translateY(0px);
+        }
+        .btn-submit-design:disabled {
+            background: #2a3b5a;
+            color: #6a7b9a;
+            cursor: not-allowed;
+            opacity: 0.7;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .design-area-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+            .design-canvas-container, .controls-panel {
+                flex: 1 1 100%; /* Take full width on smaller screens */
+                max-width: 100%;
+            }
+            .page-title { font-size: 2rem; }
+            .page-subtitle { font-size: 1rem; }
+        }
+    </style>
+{% endblock extra_head %}
+
+{% block content %}
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Design Your Unique HOXOBIL Item</h1>
+            <p class="page-subtitle">Unleash your creativity. Upload your image, add text, and make it uniquely yours!</p>
+        </div>
+
+        <div class="design-area-wrapper">
+            <div class="design-canvas-container">
+                {# Use the product.mockup_image.url passed from the view #}
+                <img id="product-mockup" src="{{ product.mockup_image.url }}" alt="{{ product.title }} Mockup">
+                <canvas id="designCanvas" width="450" height="450"></canvas>
+            </div>
+
+            <div class="controls-panel">
+                <h3>Design Tools</h3>
+                <div class="control-group">
+                    <label for="imageUpload">Upload Your Image:</label>
+                    <input type="file" id="imageUpload" accept="image/*">
+                </div>
+
+                <div class="control-group">
+                    <label for="textInput">Add Text:</label>
+                    <input type="text" id="textInput" placeholder="Enter your text">
+                    <button type="button" id="addTextBtn" class="btn-add-to-cart" style="margin-top: 10px; width: auto; padding: 0.5rem 1rem; font-size: 0.9rem;">Add Text to Design</button>
+                </div>
+                <div class="control-group">
+                    <label for="textColorPicker">Text Color:</label>
+                    <div class="color-picker-container">
+                        <input type="color" id="textColorPicker" value="#FFFFFF">
+                        <input type="text" id="textColorHex" value="#FFFFFF" style="flex-grow: 1;">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="textSize">Text Size:</label>
+                    <input type="number" id="textSize" value="30" min="10" max="100">
+                </div>
+
+                <h3>Product Options</h3>
+                <div class="control-group">
+                    <label for="productType">Selected Product:</label>
+                    {# Display the product title from the Django context. It's read-only. #}
+                    <input type="text" id="productType" value="{{ product.title }}" readonly style="cursor: not-allowed;">
+                    {# Hidden input to send product_id to backend for linking CustomDesign #}
+                    <input type="hidden" id="productId" value="{{ product.id }}">
+                </div>
+
+                {# Dynamically load size and color options from product.variants_data in JS #}
+                <div class="control-group">
+                    <label for="productSize">Select Size:</label>
+                    <select id="productSize">
+                        <option value="">Select Size</option> {# Default placeholder option #}
+                        {# Options will be populated by JavaScript #}
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="productColor">Select Color:</label>
+                    <select id="productColor">
+                        <option value="">Select Color</option> {# Default placeholder option #}
+                        {# Options will be populated by JavaScript #}
+                    </select>
+                </div>
+
+                <button type="button" id="submitDesignBtn" class="btn-submit-design">
+                    Submit My Design
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block extra_script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+        const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+
+        const canvas = new fabric.Canvas('designCanvas', {
+            backgroundColor: 'transparent', // Make canvas background transparent to show mockup
+            preserveObjectStacking: true // Ensures objects added later appear on top
+        });
+
+        const productMockup = document.getElementById('product-mockup');
+        const productId = document.getElementById('productId').value; // Get the Django Product ID from the hidden input
+
+        // --- CORRECTED PRODUCT DATA INITIALIZATION ---
+        // Retrieve the JSON data from the script tags created by Django's json_script filter
+        const productVariantsDataElement = document.getElementById('product-variants-data');
+        const productOptionsDataElement = document.getElementById('product-options-data');
+
+        const productData = {
+            id: productId, // Use the ID from the hidden input
+            title: "{{ product.title|escapejs }}", // Keep |escapejs for safe string embedding
+            mockup_image_url: "{{ product.mockup_image.url }}", // Keep direct URL embedding
+            // Parse the JSON content from the script tags
+            variants_data: productVariantsDataElement ? JSON.parse(productVariantsDataElement.textContent) : [],
+            product_options_data: productOptionsDataElement ? JSON.parse(productOptionsDataElement.textContent) : []
+        };
+        // --- END CORRECTED PRODUCT DATA INITIALIZATION ---
+
+
+        // Populate Size and Color dropdowns dynamically
+        const productSizeSelect = document.getElementById('productSize');
+        const productColorSelect = document.getElementById('productColor');
+
+        let sizeOptions = new Set();
+        let colorOptions = new Set();
+        let variantOptionMap = {}; // Maps Printify option ID to its display title (e.g., '12345' -> 'White')
+
+        // First, build a map of option value IDs to titles from the product's options data
+        // This ensures we can get the human-readable title for each variant option ID
+        productData.product_options_data.forEach(option => {
+            option.values.forEach(value => {
+                variantOptionMap[value.id] = value.title;
+            });
+        });
+
+        // Then, iterate through variants data to find available sizes and colors
+        productData.variants_data.forEach(variant => {
+            if (variant.is_enabled && variant.is_available) {
+                variant.option_value_ids.forEach(optionId => {
+                    const optionTitle = variantOptionMap[optionId];
+                    if (optionTitle) {
+                        // Heuristic: Categorize options into 'color' or 'size' based on common values.
+                        // You may need to refine this or use more explicit data if Printify provides it.
+                        const lowerCaseTitle = optionTitle.toLowerCase();
+                        if (['black', 'white', 'navy', 'sport grey', 'red', 'blue', 'green', 'grey', 'yellow', 'pink', 'purple', 'brown'].includes(lowerCaseTitle)) {
+                            colorOptions.add(optionTitle);
+                        } else if (['s', 'm', 'l', 'xl', '2xl', '3xl', '4xl', '5xl'].includes(lowerCaseTitle)) {
+                            sizeOptions.add(optionTitle);
+                        } else {
+                            console.warn(`Uncategorized option detected: ${optionTitle} (ID: ${optionId}). Consider refining categorization logic.`);
+                        }
+                    }
+                });
+            }
+        });
+
+        // Populate size dropdown
+        productSizeSelect.innerHTML = '<option value="">Select Size</option>'; // Always start with a placeholder
+        if (sizeOptions.size === 0) {
+            productSizeSelect.innerHTML += '<option value="" disabled>No sizes available</option>';
+            productSizeSelect.disabled = true;
+        } else {
+            // Custom sort for sizes (S, M, L, XL, etc.)
+            const sizeOrder = ['S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
+            Array.from(sizeOptions).sort((a, b) => {
+                const indexA = sizeOrder.indexOf(a.toUpperCase());
+                const indexB = sizeOrder.indexOf(b.toUpperCase());
+                return indexA - indexB; // Sort by predefined order
+            }).forEach(size => {
+                const option = document.createElement('option');
+                option.value = size;
+                option.textContent = size;
+                productSizeSelect.appendChild(option);
+            });
+            productSizeSelect.disabled = false;
+        }
+
+        // Populate color dropdown
+        productColorSelect.innerHTML = '<option value="">Select Color</option>'; // Always start with a placeholder
+        if (colorOptions.size === 0) {
+            productColorSelect.innerHTML += '<option value="" disabled>No colors available</option>';
+            productColorSelect.disabled = true;
+        } else {
+            // Alphabetical sort for colors
+            Array.from(colorOptions).sort().forEach(color => {
+                const option = document.createElement('option');
+                option.value = color;
+                option.textContent = color;
+                productColorSelect.appendChild(option);
+            });
+            productColorSelect.disabled = false;
+        }
+
+        // Set mockup image based on product.mockup_image_url
+        if (productData.mockup_image_url) {
+            productMockup.src = productData.mockup_image_url;
+        }
+
+        // Adjust canvas size to fit the mockup's printable area
+        function setCanvasDimensions() {
+            const mockupWidth = productMockup.offsetWidth;
+            const mockupHeight = productMockup.offsetHeight;
+
+            // These values define the approximate printable area on your mockup image.
+            // **CRITICAL:** You MUST adjust these percentages and offsets to perfectly match
+            // the printable area of your `product.mockup_image` and Printify's specifications.
+            // For example, on a t-shirt, the print area isn't the whole shirt.
+            // If your mockup has a large blank area around the shirt itself, adjust these.
+            const printableAreaRelativeWidth = 0.6; // e.g., 60% of the mockup image's displayed width
+            const printableAreaRelativeHeight = 0.7; // e.g., 70% of the mockup image's displayed height
+            const printableAreaOffsetX = 0.2; // e.g., 20% from the left edge of the mockup image
+            const printableAreaOffsetY = 0.15; // e.g., 15% from the top edge of the mockup image
+
+            const canvasWidth = mockupWidth * printableAreaRelativeWidth;
+            const canvasHeight = mockupHeight * printableAreaRelativeHeight;
+
+            canvas.setWidth(canvasWidth);
+            canvas.setHeight(canvasHeight);
+
+            // Position the canvas precisely over the calculated print area on the mockup
+            canvas.getElement().style.position = 'absolute';
+            canvas.getElement().style.top = `${productMockup.offsetTop + (mockupHeight * printableAreaOffsetY)}px`;
+            canvas.getElement().style.left = `${productMockup.offsetLeft + (mockupWidth * printableAreaOffsetX)}px`;
+
+            canvas.renderAll();
+        }
+
+        // Bind canvas dimension adjustment to mockup image load and window resize
+        productMockup.onload = setCanvasDimensions;
+        window.addEventListener('resize', setCanvasDimensions);
+        // Also call immediately if image is already loaded (e.g., from browser cache)
+        if (productMockup.complete) {
+            setCanvasDimensions();
+        }
+
+        // Helper to get CSS variable values (for Fabric.js object styling)
+        function varGlobal(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue('--' + name).trim();
+        }
+
+        // --- Image Upload Functionality ---
+        const imageUpload = document.getElementById('imageUpload');
+        imageUpload.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (f) {
+                    const data = f.target.result;
+                    fabric.Image.fromURL(data, function (img) {
+                        // Scale down image if it's too large for the canvas
+                        if (img.width > canvas.width || img.height > canvas.height) {
+                            img.scaleToWidth(canvas.getWidth() * 0.8); // Scale to 80% of canvas width if too large
+                        }
+                        
+                        // Center the image on the canvas initially
+                        img.set({
+                            left: (canvas.getWidth() - img.getScaledWidth()) / 2,
+                            top: (canvas.getHeight() - img.getScaledHeight()) / 2,
+                            angle: 0,
+                            padding: 10,
+                            cornerSize: 10,
+                            borderColor: varGlobal('primary-accent-color'),
+                            cornerColor: varGlobal('primary-accent-color'),
+                            transparentCorners: false,
+                            borderScaleFactor: 1.5,
+                        });
+                        canvas.add(img);
+                        canvas.setActiveObject(img); // Make it active for immediate manipulation
+                        canvas.renderAll();
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // --- Text Controls Functionality ---
+        const textInput = document.getElementById('textInput');
+        const addTextBtn = document.getElementById('addTextBtn');
+        const textColorPicker = document.getElementById('textColorPicker');
+        const textColorHex = document.getElementById('textColorHex');
+        const textSizeInput = document.getElementById('textSize');
+
+        addTextBtn.addEventListener('click', function () {
+            const text = textInput.value.trim();
+            if (text) {
+                const newText = new fabric.IText(text, {
+                    left: 50,
+                    top: 50,
+                    fontFamily: 'Poppins', // Default font
+                    fontSize: parseInt(textSizeInput.value, 10),
+                    fill: textColorPicker.value,
+                    padding: 10,
+                    cornerSize: 10,
+                    borderColor: varGlobal('primary-accent-color'),
+                    cornerColor: varGlobal('primary-accent-color'),
+                    transparentCorners: false,
+                    borderScaleFactor: 1.5,
+                });
+                canvas.add(newText);
+                canvas.setActiveObject(newText);
+                canvas.renderAll();
+                textInput.value = ''; // Clear input after adding text
+            }
+        });
+
+        // Update active text object color and hex input when color picker changes
+        textColorPicker.addEventListener('input', function() {
+            const color = this.value;
+            textColorHex.value = color.toUpperCase();
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text') {
+                activeObject.set('fill', color);
+                canvas.renderAll();
+            }
+        });
+
+        // Update active text object color and color picker when hex input changes
+        textColorHex.addEventListener('input', function() {
+            const color = this.value;
+            // Basic hex validation to ensure it's a valid color before applying
+            if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
+                textColorPicker.value = color; // Sync color picker
+                const activeObject = canvas.getActiveObject();
+                if (activeObject && activeObject.type === 'i-text') {
+                    activeObject.set('fill', color);
+                    canvas.renderAll();
+                }
+            }
+        });
+
+        // Update active text object font size when size input changes
+        textSizeInput.addEventListener('input', function() {
+            const size = parseInt(this.value, 10);
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text' && !isNaN(size)) {
+                activeObject.set('fontSize', size);
+                canvas.renderAll();
+            }
+        });
+
+        // Update controls panel inputs when a canvas object is selected
+        canvas.on('selection:created', updateControls);
+        canvas.on('selection:updated', updateControls);
+        canvas.on('selection:cleared', clearControls);
+
+        function updateControls() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text') {
+                // If a text object is selected, populate text controls
+                textInput.value = activeObject.text;
+                textColorPicker.value = activeObject.fill;
+                textColorHex.value = activeObject.fill.toUpperCase();
+                textSizeInput.value = activeObject.fontSize;
+            } else {
+                // If no object or a non-text object is selected, clear text controls
+                clearControls();
+            }
+        }
+
+        function clearControls() {
+            textInput.value = '';
+            // Note: textColorPicker and textSizeInput are not reset here
+            // as they might represent the default for adding *new* text.
+        }
+
+        // --- Submit Design to Backend ---
+        const submitDesignBtn = document.getElementById('submitDesignBtn');
+        submitDesignBtn.addEventListener('click', function () {
+            if (!csrfToken) {
+                if (window.displayGlobalMessageInBase) displayGlobalMessageInBase('Unable to process request. Please refresh and try again.', 'error'); else alert('Unable to process request. Please refresh and try again.');
+                return;
+            }
+
+            // Client-side validation for selected options
+            const selectedSize = productSizeSelect.value;
+            const selectedColor = productColorSelect.value;
+
+            if (!selectedSize) {
+                if (window.displayGlobalMessageInBase) displayGlobalMessageInBase('Please select a size.', 'error'); else alert('Please select a size.');
+                return;
+            }
+            if (!selectedColor) {
+                if (window.displayGlobalMessageInBase) displayGlobalMessageInBase('Please select a color.', 'error'); else alert('Please select a color.');
+                return;
+            }
+            
+            // Check if there's any actual design (objects other than the background image) on the canvas
+            // `canvas.backgroundImage` is a fabric.Image object itself if set.
+            const designObjects = canvas.getObjects().filter(obj => obj !== canvas.backgroundImage);
+            if (designObjects.length === 0) {
+                 if (window.displayGlobalMessageInBase) displayGlobalMessageInBase('Please add text or an image to your design before submitting.', 'error'); else alert('Please add text or an image to your design before submitting.');
+                 return;
+            }
+
+            // Disable button and show loading spinner during submission
+            this.disabled = true;
+            this.innerHTML = `<svg class="spinner -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"> <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle> <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path> </svg> Submitting...`;
+
+            // Export canvas content as a high-resolution PNG data URL
+            // `multiplier` controls the resolution. 2.0-3.0 is a good starting point for print quality.
+            // A higher multiplier means a larger image file and longer upload times.
+            const designImage = canvas.toDataURL({
+                format: 'png',
+                multiplier: 2.0, // E.g., for 300 DPI, if your canvas is 450px wide and print area is 6 inches, this is (6*300)/450 = 4.0
+                quality: 1 // Max quality
+            });
+
+            // Prepare FormData for the first AJAX call (submitting design to Django)
+            const submitFormData = new FormData();
+            submitFormData.append('product_id', productId); // Django Product ID
+            submitFormData.append('design_image', designImage); // Base64 encoded image data
+            submitFormData.append('product_type', productData.title); // E.g., "Men's Classic Tee"
+            submitFormData.append('size', selectedSize); // E.g., "L"
+            submitFormData.append('color', selectedColor); // E.g., "Black"
+            // You can also append the full Fabric.js JSON if you need to recreate the design later in the backend
+            // submitFormData.append('design_json', JSON.stringify(canvas.toJSON()));
+
+
+            // 1. First AJAX call: Submit the custom design image and its details to Django
+            fetch("{% url 'submit_custom_design' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest' // Identify as AJAX request
+                },
+                body: submitFormData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // If server responds with an error (non-200 status), parse it and throw
+                    return response.json().then(errData => { throw { serverError: true, data: errData, status: response.status }; })
+                                          // Fallback if JSON parsing fails
+                                          .catch(() => { throw { serverError: false, message: `HTTP error ${response.status}: ${response.statusText}` }; });
+                }
+                return response.json(); // Parse successful JSON response
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    // Display success message from the first step (design saved and uploaded)
+                    if (window.displayGlobalMessageInBase) window.displayGlobalMessageInBase(data.message, 'success');
+
+                    // 2. Second AJAX call (chained): Add the newly created custom design to the cart
+                    const customDesignId = data.custom_design_id;
+                    const addToCartFormData = new FormData();
+                    addToCartFormData.append('custom_design_id', customDesignId);
+                    addToCartFormData.append('quantity', 1); // For custom designs, quantity is typically 1 per unique design
+
+                    return fetch("{% url 'add_to_cart_custom_design_ajax' %}", {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: addToCartFormData
+                    });
+                } else {
+                    // If first call returned 'error' status in JSON
+                    throw new Error(data.message || 'Error during design submission from server.');
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // Error during the second AJAX call (add to cart)
+                    return response.json().then(errData => { throw { serverError: true, data: errData, status: response.status }; })
+                                          .catch(() => { throw { serverError: false, message: `HTTP error ${response.status}: ${response.statusText}` }; });
+                }
+                return response.json(); // Parse successful JSON response from add to cart
+            })
+            .then(cartData => {
+                if (cartData.status === 'success') {
+                    // Display success message from the second step (added to cart)
+                    if (window.displayGlobalMessageInBase) window.displayGlobalMessageInBase(cartData.message, 'success');
+                    // Redirect to the cart page upon successful addition
+                    window.location.href = '{% url "view_cart" %}';
+                } else {
+                    // If second call returned 'error' status in JSON
+                    throw new Error(cartData.message || 'Error adding design to cart.');
+                }
+            })
+            .catch(error => {
+                // Catch any error in the entire AJAX chain
+                console.error('AJAX Chain Error:', error);
+                let errorMsg = 'An unexpected error occurred. Please try again.';
+                // Provide a more specific message if available from server
+                if (error.serverError && error.data && error.data.message) {
+                    errorMsg = error.data.message;
+                } else if (error.message) {
+                    errorMsg = error.message;
+                }
+                // Display error to the user
+                if (window.displayGlobalMessageInBase) window.displayGlobalMessageInBase(errorMsg, 'error'); else alert(errorMsg);
+            })
+            .finally(() => {
+                // Re-enable the submit button and reset its text regardless of success/failure
+                this.disabled = false;
+                this.innerHTML = `Submit My Design`; // Reset button text
+            });
+        });
+    });
+</script>
+{% endblock extra_script %}
