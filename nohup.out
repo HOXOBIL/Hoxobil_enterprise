@@ -4691,3 +4691,5 @@ warning: in the working copy of 'nohup.out', LF will be replaced by CRLF the nex
 c:\Users\yanex\AppData\Local\Programs\Microsoft VS Code\resources\app\extensions\git\dist\askpass.sh: fork: retry: Resource temporarily unavailable
 Missing or invalid credentials.
 Missing pipe
+error: unable to read askpass response from 'c:\Users\yanex\AppData\Local\Programs\Microsoft VS Code\resources\app\extensions\git\dist\askpass.sh'
+bash: line 1: /dev/tty: No such device or address

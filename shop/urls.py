@@ -1,4 +1,4 @@
-from django.urls import path, include, reverse_lazy # *** MODIFIED: Added reverse_lazy ***
+from django.urls import path, include, reverse_lazy
 from . import views
 # Import Django's built-in auth views directly here for clarity
 from django.contrib.auth import views as auth_views
@@ -11,9 +11,14 @@ urlpatterns = [
     path('products/', views.fetch_printify_products, name='product_list'),
     path('product/<str:product_id>/', views.product_detail, name='product_detail'),
 
+    # --- NEW: Product Customizer URL ---
+    path('products/customize/<int:product_id>/', views.product_customizer_view, name='product_customizer'),
+    # --- END NEW URL ---
+
     # Cart URLs
     path('cart/', views.view_cart, name='view_cart'),
     path('cart/add/<str:product_id>/', views.add_to_cart, name='add_to_cart'), 
+    path('cart/add/custom/', views.add_to_cart_custom_design_ajax, name='add_to_cart_custom_design_ajax'), # Make sure this one is here
     path('cart/remove/<str:cart_key>/', views.remove_from_cart, name='remove_from_cart'),
 
     # Checkout URLs
