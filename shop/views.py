@@ -1147,3 +1147,17 @@ def add_to_cart_custom_design_ajax(request):
     except Exception as e:
         logger.exception(f"Error adding custom design {custom_design_id} from ajax to cart:")
         return JsonResponse({'status': 'error', 'message': f'An unexpected error occurred: {str(e)}'}, status=500)
+
+
+
+
+
+
+
+
+
+        def test_page_view(request):
+    """
+    A simple test view to check if the Django application is serving pages.
+    """
+    return HttpResponse("<h1>Hello from HOXOBIL! This is a test page.</h1><p>If you see this, your Django app is running!</p>")
