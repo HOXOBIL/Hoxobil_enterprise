@@ -66,4 +66,6 @@ urlpatterns = [
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
         template_name='mystore/registration/password_reset_complete.html'
     ), name='password_reset_complete'),
+
+    path('api/submit-custom-design/', views.submit_custom_design, name='submit_custom_design'),
 ]
