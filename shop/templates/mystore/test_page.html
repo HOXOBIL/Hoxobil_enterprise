@@ -1,0 +1,17 @@
+{% extends "mystore/base.html" %}
+{% load static %}
+
+{% block title %}HOXOBIL - Test Page{% endblock title %}
+
+{% block content %}
+<div style="text-align: center; padding: 50px; background-color: #0a0f1f; color: #e0e5f0; min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <h1 style="font-size: 3em; margin-bottom: 20px; color: #00e5ff;">Hello from HOXOBIL!</h1>
+    <p style="font-size: 1.2em; max-width: 600px; line-height: 1.5;">
+        If you see this page, your Django application is successfully running on PythonAnywhere and serving HTML templates.
+        This means the issue is likely specific to the customizer page's content or its data dependencies.
+    </p>
+    <p style="font-size: 1em; margin-top: 30px;">
+        <a href="{% url 'home' %}" style="color: #9e00ff; text-decoration: none; font-weight: bold;">Go back to Home</a>
+    </p>
+</div>
+{% endblock content %}
