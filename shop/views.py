@@ -264,49 +264,35 @@ def add_to_cart(request, product_id=None): # product_id can be None if custom_de
                         v_title = variant.get('title','N/A')
                         price_ngn_decimal = (Decimal(variant.get('price',0))/Decimal('100.0'))*USD_TO_NGN_RATE
                         price_ngn = float(price_ngn_decimal.quantize(Decimal('0.01'), ROUND_HALF_UP))
-                        img = item_data.get('images',[{}])[0].get('src','https://placehold.co/100x100?text=No+Img')
-                        
-                        cart[cart_item_key] = {
-                            'id': product_id_str,
-                            'variant_id': selected_variant_id,
-                            'title': title,
-                            'variant_title': v_title,
-                            'price': price_ngn,
-                            'quantity': quantity,
-                            'image_url': img,
-                            'is_custom': False,
-                        }
-                        final_message_text = f"Added {title} ({v_title}) to cart."
-                        item_added_or_updated = True
+                        img=item_data.get('images',[{}])[0].get('src','https://placehold.co/100x100?text=No+Img')
+                        cart[cart_item_key]={'id':product_id_str,'variant_id':selected_variant_id,'title':title,'variant_title':v_title,'price':price_ngn,'quantity':quantity,'image_url':img,'is_custom': False}
+                        final_message_text=f"Added {title} ({v_title}) to cart."; item_added_or_updated=True
                     except Exception as e:
                         final_message_text = f"Error adding item: {str(e)}"
                         logger.error(f"Error fetching Printify product {product_id_str} for cart: {e}")
-    
-    if item_added_or_updated:
-        save_cart(request,cart)
-        if is_ajax: return JsonResponse({'status':'success','message':final_message_text,'cart_total_items':len(cart)})
-        messages.success(request,final_message_text)
-    else:
-        if is_ajax: return JsonResponse({'status':'error','message':final_message_text,'cart_total_items':len(cart)})
-        messages.error(request,final_message_text)
+            
+            if item_added_or_updated:
+                save_cart(request,cart)
+                if is_ajax: return JsonResponse({'status':'success','message':final_message_text,'cart_total_items':len(cart)})
+                messages.success(request,final_message_text)
+            else:
+                if is_ajax: return JsonResponse({'status':'error','message':final_message_text,'cart_total_items':len(cart)})
+                messages.error(request,final_message_text)
 
-    if is_update and not is_ajax: return redirect('view_cart')
-    referer = request.META.get('HTTP_REFERER')
-    if referer and request.get_host() in referer and not is_ajax: return redirect(referer)
-    elif not is_ajax: return redirect('product_list')
-    
-    # Fallback for unexpected AJAX or non-AJAX redirects
-    if is_ajax:
-        # Ensure a valid JsonResponse is always returned for AJAX
-        return JsonResponse({'status':'error','message':final_message_text or 'Unexpected AJAX issue.','cart_total_items':len(cart)}, status=500)
-    return redirect('product_list')
+            if is_update and not is_ajax: return redirect('view_cart')
+            referer = request.META.get('HTTP_REFERER')
+            if referer and request.get_host() in referer and not is_ajax: return redirect(referer)
+            elif not is_ajax: return redirect('product_list')
+            
+            # Fallback for unexpected AJAX or non-AJAX redirects
+            if is_ajax:
+                # Ensure a valid JsonResponse is always returned for AJAX
+                return JsonResponse({'status':'error','message':final_message_text or 'Unexpected AJAX issue.','cart_total_items':len(cart)}, status=500)
+            return redirect('product_list')
 
 
 def view_cart(request):
-    cart = get_cart(request)
-    cart_items_processed = {}
-    cart_total_price = Decimal('0.0')
-
+    cart = get_cart(request); cart_items_processed = {}; cart_total_price = Decimal('0.0')
     for k, item_details in cart.items():
         try:
             price = Decimal(str(item_details.get('price',0.0)))
@@ -314,14 +300,13 @@ def view_cart(request):
         except (ValueError, TypeError):
             price = Decimal('0.0')
             quantity = 0
-
-        current_item = item_details.copy()
+        current_item = item_details.copy();
         current_item['price_per_unit_decimal'] = price
         current_item['price'] = float(price)
         current_item['quantity']=quantity
         current_item['total_price']= float(price*quantity)
         current_item['cart_key']=k
-        cart_items_processed[k]=current_item
+        cart_items_processed[k]=current_item;
         cart_total_price+= (price*quantity)
     
     return render(request, 'mystore/cart.html', {'cart_items':cart_items_processed,'cart_total_price':cart_total_price})
@@ -372,10 +357,10 @@ def checkout_submit(request):
         phone = request.POST.get('phone', ''); address = request.POST.get('address', ''); city = request.POST.get('city', ''); state_province = request.POST.get('state', '')
         zipcode = request.POST.get('zipcode', ''); country = request.POST.get('country', 'NG') # Default to NG for Nigeria
         
-        cart_total_price_ngn_decimal = Decimal('0.0')
-        cart_snapshot_for_session = {} # Store a copy of the cart for order creation
+        cart_total_price_ngn_decimal = Decimal('0.0'); cart_snapshot_for_session = {}
         
-        printify_line_items = [] # Items to send to Printify
+        # Prepare line items for Printify order
+        printify_line_items = []
 
         for item_key, item_details in cart.items():
             item_price_decimal = Decimal(str(item_details.get('price', '0.0')))
@@ -637,9 +622,9 @@ def paystack_callback(request):
                 order_data = {
                     'first_name':order_details_session.get('first_name'), 'last_name':order_details_session.get('last_name'),
                     'email':order_details_session.get('email'), 'phone':order_details_session.get('phone'),
-                    'address':order_details_session.get('address'), 'city':order_details_session.get('city'),
-                    'state':order_details_session.get('state'), 'zipcode':order_details_session.get('zipcode'),
-                    'country':order_details_session.get('country'),
+                    'address':address, 'city':city,
+                    'state':state_province, 'zipcode':zipcode,
+                    'country':country,
                     'total_amount':Decimal(str(order_details_session.get('total_amount', '0.0'))).quantize(Decimal('0.01'), ROUND_HALF_UP),
                     'paid':True, 'paystack_reference':reference
                 }
@@ -956,15 +941,16 @@ def sync_products_to_db(products_from_api):
     return created_count, updated_count
 
 def sync_products_view(request):
-    if not PRINTIFY_API_TOKEN or not PRINTIFY_SHOP_ID:
-        messages.error(request, "API token or Shop ID not configured for sync.")
-        return JsonResponse({'status': 'error', 'message': 'API token or Shop ID not configured.'})
+    if not PRINTIFY_API_TOKEN:
+        messages.error(request, "API token not configured."); return JsonResponse({'status': 'error', 'message': 'API token not configured.'})
+    if not PRINTIFY_SHOP_ID:
+        messages.error(request, "Shop ID not configured."); return JsonResponse({'status': 'error', 'message': 'Shop ID not configured.'})
     
     all_products_from_api = []
     page = 1
     while True:
         api_url = f"{API_BASE_URL}/shops/{PRINTIFY_SHOP_ID}/products.json?page={page}&limit=100"
-        logger.info(f"   Fetching page {page} from {api_url}")
+        logger.info(f"    Fetching page {page} from {api_url}")
         try:
             response = requests.get(api_url, headers=HEADERS, timeout=20)
             response.raise_for_status()
@@ -986,7 +972,7 @@ def sync_products_view(request):
         messages.info(request, "No products found in Printify shop to sync.")
         return JsonResponse({'status': 'info', 'message': 'No products found in Printify shop to sync.'})
     
-    logger.info(f"   Total products fetched from Printify API: {len(all_products_from_api)}")
+    logger.info(f"    Total products fetched from Printify API: {len(all_products_from_api)}")
     created, updated = sync_products_to_db(all_products_from_api)
     msg = f"Synchronization complete. Products created: {created}, Products updated: {updated}."
     logger.info(f"✅ {msg}")
@@ -1148,17 +1134,9 @@ def add_to_cart_custom_design_ajax(request):
         logger.exception(f"Error adding custom design {custom_design_id} from ajax to cart:")
         return JsonResponse({'status': 'error', 'message': f'An unexpected error occurred: {str(e)}'}, status=500)
 
-
-
-
-
-
-
-
- 
-        def test_page_view(request):
-            
-            """
-A simple test view to check if the Django application is serving pages.
+def test_page_view(request):
     """
-    return HttpResponse("<h1>Hello from HOXOBIL! This is a test page.</h1><p>If you see this, your Django app is running!</p>")
+    A simple test view to check if the Django application is serving pages.
+    This version renders an HTML template.
+    """
+    return render(request, 'mystore/test_page.html')
