@@ -24,41 +24,61 @@ from django.core.files.base import ContentFile
 from django.template.defaultfilters import slugify # For generating clean filenames
 import logging
 
+# Initialize logger for this module
 logger = logging.getLogger(__name__)
 
 # --- Configuration ---
+# Retrieve API keys and shop ID from environment variables
 PRINTIFY_SHOP_ID = os.getenv('PRINTIFY_SHOP_ID')
 PRINTIFY_API_TOKEN = os.getenv("PRINTIFY_API_TOKEN")
 PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY')
 PAYSTACK_PUBLIC_KEY = os.getenv('PAYSTACK_PUBLIC_KEY')
 
+# Log warnings if critical environment variables are not set
 if not PRINTIFY_API_TOKEN: logger.warning("🔴 CRITICAL WARNING: PRINTIFY_API_TOKEN is not set.")
 if not PAYSTACK_SECRET_KEY: logger.warning("🔴 CRITICAL WARNING: PAYSTACK_SECRET_KEY is not set.")
 if not PRINTIFY_SHOP_ID: logger.warning("🔴 CRITICAL WARNING: PRINTIFY_SHOP_ID is not set.")
 
+# Define common headers for Printify API requests
 HEADERS = { 'Authorization': f'Bearer {PRINTIFY_API_TOKEN}', 'Content-Type': 'application/json'}
-USD_TO_NGN_RATE = Decimal('1607.00') # Make sure this is up-to-date!
+# Define USD to NGN conversion rate. IMPORTANT: Keep this up-to-date!
+USD_TO_NGN_RATE = Decimal('1607.00')
 API_BASE_URL = "https://api.printify.com/v1"
 PAYSTACK_API_BASE_URL = "https://api.paystack.co"
 
-# Initialize Printify API client
+# Initialize Printify API client with the token
 printify_client = PrintifyAPI(api_key=PRINTIFY_API_TOKEN)
 
 
 # --- Cart Helper Functions ---
 def get_cart(request):
+    """
+    Retrieves the current cart from the user's session.
+    If no cart exists, an empty dictionary is returned.
+    """
     cart = request.session.get('cart', {})
     return cart
 
 def save_cart(request, cart):
+    """
+    Saves the provided cart dictionary back into the user's session.
+    Marks the session as modified to ensure it's saved.
+    """
     request.session['cart'] = cart
     request.session.modified = True
 
-# --- Views ---
+# --- General Views ---
 def home(request):
+    """
+    Renders the home page of the store.
+    """
     return render(request, 'mystore/home.html')
 
 def infer_category_from_title(title):
+    """
+    Infers a product category based on keywords in its title.
+    This is a simple heuristic and can be expanded.
+    """
     title_lower = title.lower()
     if "hoodie" in title_lower or "hooded sweatshirt" in title_lower: return "Hoodies & Sweatshirts"
     if "t-shirt" in title_lower or "tee" in title_lower: return "T-Shirts"
@@ -69,55 +89,115 @@ def infer_category_from_title(title):
     return "Other"
 
 def fetch_printify_products(request):
-    if not PRINTIFY_API_TOKEN: messages.error(request, "API token not configured."); return render(request, 'mystore/products.html', {'categorized_products': {}, 'error': 'API token not configured.'})
-    if not PRINTIFY_SHOP_ID: messages.error(request, "Shop ID not configured."); return render(request, 'mystore/products.html', {'categorized_products': {}, 'error': 'Shop ID not configured.'})
+    """
+    Fetches products from the Printify API, processes their data (e.g., price conversion),
+    categorizes them, and renders the product list page.
+    """
+    # Check for API configuration before making external requests
+    if not PRINTIFY_API_TOKEN:
+        messages.error(request, "API token not configured.")
+        return render(request, 'mystore/products.html', {'categorized_products': {}, 'error': 'API token not configured.'})
+    if not PRINTIFY_SHOP_ID:
+        messages.error(request, "Shop ID not configured.")
+        return render(request, 'mystore/products.html', {'categorized_products': {}, 'error': 'Shop ID not configured.'})
+
     api_url = f"{API_BASE_URL}/shops/{PRINTIFY_SHOP_ID}/products.json"
     categorized_products = defaultdict(list)
     error_message_for_template = None
+
     try:
+        # Make a GET request to the Printify API
         response = requests.get(api_url, headers=HEADERS, timeout=15)
-        response.raise_for_status()
+        response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
         raw_products = response.json().get('data', [])
+
+        # Process each product fetched from Printify
         for item in raw_products:
             variants = item.get('variants', [])
+            # Get the price of the first variant as a base price, if available
             price_cents = variants[0].get('price', 0) if variants else 0
+            # Convert price from cents (Printify) to NGN
             price_ngn = (Decimal(price_cents) / Decimal('100.0')) * USD_TO_NGN_RATE
+            # Get the first image URL, or a placeholder if none
             img_url = item.get('images', [{}])[0].get('src', 'https://placehold.co/600x400?text=No+Image')
             product_title = item.get('title', 'No Title')
             category = infer_category_from_title(product_title)
+
             proc_variants = []
+            # Process each variant of the product
             for v_data in variants:
                 v_price_cents = Decimal(v_data.get('price', 0))
                 v_price_ngn = (v_price_cents / Decimal('100.0')) * USD_TO_NGN_RATE
-                proc_variants.append({'id': str(v_data.get('id')), 'title': v_data.get('title', 'N/A'), 'price_ngn': float(v_price_ngn.quantize(Decimal('0.01'), ROUND_HALF_UP)), 'is_enabled': v_data.get('is_enabled', False), 'is_available': v_data.get('is_available', True), 'option_value_ids': [str(oid) for oid in v_data.get('options',[])] })
-            product_item_data = {'id': str(item.get('id')), 'title': product_title, 'price': float(price_ngn.quantize(Decimal('0.01'), ROUND_HALF_UP)), 'image_url': img_url, 'variants': proc_variants, 'options': item.get('options', []) }
+                proc_variants.append({
+                    'id': str(v_data.get('id')),
+                    'title': v_data.get('title', 'N/A'),
+                    'price_ngn': float(v_price_ngn.quantize(Decimal('0.01'), ROUND_HALF_UP)),
+                    'is_enabled': v_data.get('is_enabled', False),
+                    'is_available': v_data.get('is_available', True),
+                    'option_value_ids': [str(oid) for oid in v_data.get('options',[])]
+                })
+            
+            # Prepare product data for the template
+            product_item_data = {
+                'id': str(item.get('id')),
+                'title': product_title,
+                'price': float(price_ngn.quantize(Decimal('0.01'), ROUND_HALF_UP)),
+                'image_url': img_url,
+                'variants': proc_variants,
+                'options': item.get('options', [])
+            }
             categorized_products[category].append(product_item_data)
+
     except Exception as e:
+        # Catch any exceptions during API call or data processing
         error_message_for_template = f"Error fetching products: {str(e)}"
         logger.error(f"❌ {error_message_for_template}")
         messages.error(request, "Could not fetch products.")
+        
     return render(request, 'mystore/products.html', {'categorized_products': dict(categorized_products), 'error': error_message_for_template })
 
 def product_detail(request, product_id):
-    if not PRINTIFY_API_TOKEN or not PRINTIFY_SHOP_ID: messages.error(request, "API/Shop token not configured."); return render(request, 'mystore/product_detail.html', {'product': None, 'error': 'Configuration error.'})
+    """
+    Fetches details for a single product from Printify, processes it,
+    and renders the product detail page.
+    """
+    # Check for API configuration
+    if not PRINTIFY_API_TOKEN or not PRINTIFY_SHOP_ID:
+        messages.error(request, "API/Shop token not configured.")
+        return render(request, 'mystore/product_detail.html', {'product': None, 'error': 'Configuration error.'})
+    
     url = f"{API_BASE_URL}/shops/{PRINTIFY_SHOP_ID}/products/{product_id}.json"
     product_data_for_template = None
     error_msg = None
+
     try:
+        # Fetch product details from Printify
         res = requests.get(url, headers=HEADERS, timeout=10)
         res.raise_for_status()
         item = res.json()
+
+        # Process product options for display
         opts = [{'name':o.get('name'),'type':o.get('type'),'values':[{'id':str(v.get('id')),'title':v.get('title')} for v in o.get('values',[])]} for o in item.get('options',[])]
+        
         proc_vars = []
+        # Process product variants for display
         for v_data in item.get('variants', []):
             v_price_ngn = (Decimal(v_data.get('price',0))/Decimal('100.0'))*USD_TO_NGN_RATE
-            proc_vars.append({'id':str(v_data.get('id')),'title':v_data.get('title','N/A'), 'price_ngn':float(v_price_ngn.quantize(Decimal('0.01'), ROUND_HALF_UP)), 'is_enabled':v_data.get('is_enabled',False),'is_available':v_data.get('is_available',True), 'option_value_ids':[str(oid) for oid in v_data.get('options',[])]})
+            proc_vars.append({
+                'id':str(v_data.get('id')),
+                'title':v_data.get('title','N/A'),
+                'price_ngn':float(v_price_ngn.quantize(Decimal('0.01'), ROUND_HALF_UP)),
+                'is_enabled':v_data.get('is_enabled',False),
+                'is_available':v_data.get('is_available',True),
+                'option_value_ids':[str(oid) for oid in v_data.get('options',[])]
+            })
         base_price = proc_vars[0]['price_ngn'] if proc_vars else 0.0
         
-        # Look up the local Product model instance for the mockup image
+        # Look up the local Product model instance for the mockup image (if available)
         local_product_obj = Product.objects.filter(printify_id=product_id).first()
         mockup_image_url = local_product_obj.mockup_image.url if local_product_obj and local_product_obj.mockup_image else None
 
+        # Prepare final product data for the template
         product_data_for_template = {
             'id':str(item.get('id')),
             'title':item.get('title','N/A'),
@@ -129,17 +209,23 @@ def product_detail(request, product_id):
             'mockup_image_url': mockup_image_url # Add mockup_image_url
         }
     except Exception as e:
+        # Catch any exceptions during API call or data processing
         error_msg = f"Error fetching product {product_id}: {str(e)}"
         logger.error(f"❌ {error_msg}")
         messages.error(request, f"Could not fetch product {product_id}.")
+
     return render(request, 'mystore/product_detail.html', {'product': product_data_for_template, 'error': error_msg})
 
 @require_POST # Ensure only POST requests for add to cart
 @login_required # Ensure user is logged in to add to cart
 def add_to_cart(request, product_id=None): # product_id can be None if custom_design_id is passed
+    """
+    Adds a product (standard or custom) to the user's cart stored in the session.
+    Handles quantity updates and removal.
+    """
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     
-    # Custom design path: Check for custom_design_id in POST data
+    # Check for custom design ID in POST data
     custom_design_id = request.POST.get('custom_design_id')
 
     cart = get_cart(request)
@@ -160,16 +246,18 @@ def add_to_cart(request, product_id=None): # product_id can be None if custom_de
         # --- Handling Custom Design addition to cart ---
         try:
             custom_design = CustomDesign.objects.get(id=custom_design_id, user=request.user)
-            if custom_design.status not in ['uploaded_to_printify', 'pending', 'added_to_cart']: # Allow re-adding
+            # Allow re-adding if status is valid
+            if custom_design.status not in ['uploaded_to_printify', 'pending', 'added_to_cart']:
                 return JsonResponse({'status': 'error', 'message': 'Custom design is not in a valid state to be added to cart.'}, status=400)
             
             cart_item_key = f"custom_design_{custom_design.id}" # Unique key for custom designs
             
-            # Custom designs are unique instances, but we allow incrementing quantity for the same saved design
+            # If item already in cart, increment quantity
             if cart_item_key in cart:
                 cart[cart_item_key]['quantity'] += quantity
                 final_message_text = f"Added {quantity} more of your custom '{custom_design.product.title}' design to cart."
             else:
+                # Add new custom design to cart
                 price = custom_design.product.base_price_ngn # Use the base product price for now
                 cart[cart_item_key] = {
                     'id': custom_design.product.printify_id, # Printify ID of the base product
@@ -212,8 +300,6 @@ def add_to_cart(request, product_id=None): # product_id can be None if custom_de
                 cart_item_key = f"{product_id_str}-{selected_variant_id}"
             elif is_update:
                 # When updating, the key should match the existing key in the cart
-                # This needs to be carefully handled if product_id_str != product_id_str-variant_id
-                # For updates, we usually get the full `cart_key` from the frontend
                 cart_item_key = request.POST.get('cart_key', product_id_str) # Expect cart_key from frontend for updates
 
             if quantity <= 0 and is_update:
@@ -265,7 +351,16 @@ def add_to_cart(request, product_id=None): # product_id can be None if custom_de
                         price_ngn_decimal = (Decimal(variant.get('price',0))/Decimal('100.0'))*USD_TO_NGN_RATE
                         price_ngn = float(price_ngn_decimal.quantize(Decimal('0.01'), ROUND_HALF_UP))
                         img=item_data.get('images',[{}])[0].get('src','https://placehold.co/100x100?text=No+Img')
-                        cart[cart_item_key]={'id':product_id_str,'variant_id':selected_variant_id,'title':title,'variant_title':v_title,'price':price_ngn,'quantity':quantity,'image_url':img,'is_custom': False}
+                        cart[cart_item_key]={
+                            'id':product_id_str,
+                            'variant_id':selected_variant_id,
+                            'title':title,
+                            'variant_title':v_title,
+                            'price':price_ngn,
+                            'quantity':quantity,
+                            'image_url':img,
+                            'is_custom': False
+                        }
                         final_message_text=f"Added {title} ({v_title}) to cart."; item_added_or_updated=True
                     except Exception as e:
                         final_message_text = f"Error adding item: {str(e)}"
@@ -292,7 +387,14 @@ def add_to_cart(request, product_id=None): # product_id can be None if custom_de
 
 
 def view_cart(request):
-    cart = get_cart(request); cart_items_processed = {}; cart_total_price = Decimal('0.0')
+    """
+    Renders the cart view, displaying all items currently in the user's session cart
+    and calculating the total price.
+    """
+    cart = get_cart(request)
+    cart_items_processed = {}
+    cart_total_price = Decimal('0.0')
+
     for k, item_details in cart.items():
         try:
             price = Decimal(str(item_details.get('price',0.0)))
@@ -300,6 +402,7 @@ def view_cart(request):
         except (ValueError, TypeError):
             price = Decimal('0.0')
             quantity = 0
+        
         current_item = item_details.copy();
         current_item['price_per_unit_decimal'] = price
         current_item['price'] = float(price)
@@ -308,13 +411,17 @@ def view_cart(request):
         current_item['cart_key']=k
         cart_items_processed[k]=current_item;
         cart_total_price+= (price*quantity)
-    
+        
     return render(request, 'mystore/cart.html', {'cart_items':cart_items_processed,'cart_total_price':cart_total_price})
 
 @login_required
 def remove_from_cart(request, cart_key):
+    """
+    Removes an item from the cart based on its cart_key.
+    If the item is a custom design, it also deletes the associated CustomDesign object.
+    """
     cart = get_cart(request)
-    if cart_key in cart: 
+    if cart_key in cart:    
         title = cart[cart_key].get('variant_title',cart[cart_key].get('title','Item'))
         # If it's a custom design, also delete the CustomDesign object from the database
         if cart[cart_key].get('is_custom') and 'custom_design_id' in cart[cart_key]:
@@ -328,32 +435,61 @@ def remove_from_cart(request, cart_key):
         del cart[cart_key]
         save_cart(request,cart)
         messages.success(request,f"Removed {title} from cart.")
-    else: messages.error(request,"Item not found in cart. Could not remove.")
+    else:
+        messages.error(request,"Item not found in cart. Could not remove.")
     return redirect('view_cart')
 
 @login_required
 def checkout_page(request):
+    """
+    Renders the checkout page, displaying cart items and preparing for payment.
+    """
     cart = get_cart(request)
-    if not cart: messages.info(request, "Your cart is empty."); return redirect('view_cart')
-    cart_items_display = {}; cart_total_price_decimal = Decimal('0.0')
+    if not cart:
+        messages.info(request, "Your cart is empty.")
+        return redirect('view_cart')
+    
+    cart_items_display = {}
+    cart_total_price_decimal = Decimal('0.0')
     for cart_key, item_details in cart.items():
-        try: price = Decimal(str(item_details.get('price', '0.0'))); quantity = int(item_details.get('quantity', 0))
-        except (ValueError, TypeError): price = Decimal('0.0'); quantity = 0
-        current_item = item_details.copy(); current_item['price_per_unit'] = float(price); current_item['quantity'] = quantity
-        current_item['total_price'] = float(price * quantity); current_item['cart_key'] = cart_key
-        cart_items_display[cart_key] = current_item; cart_total_price_decimal += (price * quantity)
-    context = {'cart_items': cart_items_display, 'cart_total_price': cart_total_price_decimal, 'paystack_public_key': PAYSTACK_PUBLIC_KEY }
+        try:
+            price = Decimal(str(item_details.get('price', '0.0')))
+            quantity = int(item_details.get('quantity', 0))
+        except (ValueError, TypeError):
+            price = Decimal('0.0')
+            quantity = 0
+        
+        current_item = item_details.copy();
+        current_item['price_per_unit'] = float(price);
+        current_item['quantity'] = quantity
+        current_item['total_price'] = float(price * quantity);
+        current_item['cart_key'] = cart_key
+        cart_items_display[cart_key] = current_item;
+        cart_total_price_decimal += (price * quantity)
+    
+    context = {
+        'cart_items': cart_items_display,
+        'cart_total_price': cart_total_price_decimal,
+        'paystack_public_key': PAYSTACK_PUBLIC_KEY
+    }
     return render(request, 'mystore/checkout.html', context)
 
 @login_required
 def checkout_submit(request):
+    """
+    Processes the checkout form submission, initializes a Paystack transaction,
+    and prepares data for Printify order creation.
+    """
     if request.method == 'POST':
         cart = get_cart(request)
-        if not cart: messages.error(request, "Your cart is empty."); return redirect('view_cart')
+        if not cart:
+            messages.error(request, "Your cart is empty.")
+            return redirect('view_cart')
         
-        # --- CORRECTED: Define these variables BEFORE they are used in the payload ---
+        # --- Define shipping/billing variables from POST data or user profile ---
         email = request.POST.get('email') or request.user.email
-        name = request.POST.get('name', ''); first_name = name.split(' ')[0] if name else request.user.first_name or 'Customer'
+        name = request.POST.get('name', '');
+        first_name = name.split(' ')[0] if name else request.user.first_name or 'Customer'
         last_name = ' '.join(name.split(' ')[1:]) if ' ' in name else request.user.last_name or ''
         phone = request.POST.get('phone', '')
         address = request.POST.get('address', '')
@@ -361,9 +497,10 @@ def checkout_submit(request):
         state_province = request.POST.get('state', '')
         zipcode = request.POST.get('zipcode', '')
         country = request.POST.get('country', 'NG') # Default to NG for Nigeria
-        # --- END CORRECTION ---
+        # --- End variable definition ---
 
-        cart_total_price_ngn_decimal = Decimal('0.0'); cart_snapshot_for_session = {}
+        cart_total_price_ngn_decimal = Decimal('0.0');
+        cart_snapshot_for_session = {} # To store cart details for OrderItem creation later
         
         # Prepare line items for Printify order
         printify_line_items = []
@@ -384,26 +521,16 @@ def checkout_submit(request):
                         raise ValueError(f"Custom design {custom_design_obj.id} has no Printify image ID. Please upload it first.")
 
                     # --- CRITICAL LOGIC FOR FINDING PRINTIFY VARIANT ID ---
-                    # You need to map selected_size, selected_color to a Printify variant ID
+                    # This logic assumes variant title is "Color / Size" (e.g., "White / S")
+                    # You might need to fetch or map Printify's option_value_ids for the selected color/size
                     matched_printify_variant_id = None
                     if custom_design_obj.product and custom_design_obj.product.variants_data:
-                        # Iterate through the stored variants data to find a match
                         for pv in custom_design_obj.product.variants_data:
-                            # This logic assumes variant title is "Color / Size" (e.g., "White / S")
-                            # Or you need to check pv.get('option_value_ids') against what Printify expects
-                            # E.g., if Printify sends option_value_ids as ['color_id_1', 'size_id_1']
-                            # You would need to know the IDs for 'White' and 'S' from Printify.
-                            # For simplicity, let's try matching the title if available.
+                            # Example matching by title. Adjust based on how Printify provides variant options.
                             if pv.get('title') == f"{custom_design_obj.selected_color} / {custom_design_obj.selected_size}" and pv.get('is_enabled') and pv.get('is_available'):
                                 matched_printify_variant_id = pv.get('id')
                                 break
-                            # Alternative: More robust if Printify option values are consistent
-                            # You'd need to fetch or map Printify's option_value_ids for the selected color/size.
-                            # For example, if you know 'White' has option_value_id 'A' and 'S' has 'B':
-                            # if 'A' in pv.get('option_value_ids', []) and 'B' in pv.get('option_value_ids', []):
-                            #     matched_printify_variant_id = pv.get('id')
-                            #     break
-
+                    
                     if not matched_printify_variant_id:
                         logger.error(f"Could not find matching Printify variant for custom design {custom_design_obj.id}: Product={custom_design_obj.product.title}, Size={custom_design_obj.selected_size}, Color={custom_design_obj.selected_color}")
                         raise ValueError(f"Could not find matching Printify variant for custom design {custom_design_obj.id}.")
@@ -418,7 +545,6 @@ def checkout_submit(request):
                                 "src": custom_design_obj.design_image.url, # Direct URL to your hosted image
                                 "id": custom_design_obj.printify_image_id, # Printify's asset ID
                                 # Adjust x, y, scale, angle, placement based on your design needs and Printify print area
-                                # These are relative to the print area. 0.5, 0.5 centers it.
                                 "x": 0.5,
                                 "y": 0.5,
                                 "scale": 1.0,
@@ -455,20 +581,21 @@ def checkout_submit(request):
                     "product_id": local_product.printify_id,
                     "variant_id": variant_id_from_cart,
                     "quantity": item_quantity,
-                    "print_provider_id": local_product.printify_print_provider_id 
+                    "print_provider_id": local_product.printify_print_provider_id    
                 })
 
-        # Final checks before proceeding
+        # Final checks before proceeding with payment
         if not printify_line_items:
             messages.error(request, "No valid items found in cart for Printify order.")
             return redirect('view_cart')
 
+        # Calculate total price in kobo for Paystack
         cart_total_price_kobo = int(cart_total_price_ngn_decimal.quantize(Decimal('0.01'), ROUND_HALF_UP) * 100)
         if cart_total_price_kobo <= 0:
             messages.error(request, "Order total is invalid.");
             return redirect('view_cart')
 
-        # Create Printify Order Payload
+        # Create Printify Order Payload (to be sent after successful payment)
         printify_order_payload = {
             "external_id": f"hoxobil_order_{uuid.uuid4().hex[:10]}", # A unique ID for Printify
             "order_items": printify_line_items,
@@ -487,7 +614,9 @@ def checkout_submit(request):
         
         # --- Paystack Initialization ---
         order_reference = f"HOXOBIL-{uuid.uuid4().hex[:10].upper()}"
-        if not PAYSTACK_SECRET_KEY: messages.error(request, "Payment gateway not configured."); return redirect('checkout')
+        if not PAYSTACK_SECRET_KEY:
+            messages.error(request, "Payment gateway not configured.")
+            return redirect('checkout')
         
         init_url = f"{PAYSTACK_API_BASE_URL}/transaction/initialize"
         callback_url = request.build_absolute_uri(reverse('paystack_callback'))
@@ -512,7 +641,7 @@ def checkout_submit(request):
         try:
             logger.info(f"🚀 Initializing Paystack. Ref: {order_reference}, Amount: {cart_total_price_kobo} Kobo")
             response = requests.post(init_url, headers=paystack_headers, json=payload, timeout=20)
-            response.raise_for_status()
+            response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
             response_data = response.json()
             logger.info(f"✅ Paystack Init Response: {json.dumps(response_data, indent=2)}")
             
@@ -520,7 +649,7 @@ def checkout_submit(request):
                 authorization_url = response_data["data"]["authorization_url"]
                 request.session['paystack_reference'] = order_reference
                 # Store the Printify order payload in session for later use after Paystack success
-                request.session['printify_order_payload'] = printify_order_payload 
+                request.session['printify_order_payload'] = printify_order_payload    
                 request.session['order_details_for_completion'] = {
                     'first_name': first_name, 'last_name': last_name, 'email': email, 'phone': phone,
                     'address': address, 'city': city, 'state': state_province, 'zipcode': zipcode,
@@ -550,6 +679,10 @@ def checkout_submit(request):
 
 @login_required
 def paystack_callback(request):
+    """
+    Handles the callback from Paystack after a payment attempt.
+    Verifies the transaction, creates a local order, and attempts to create a Printify order.
+    """
     reference = request.GET.get('reference') or request.GET.get('trxref')
     logger.info(f"📞 Paystack Callback received. Reference: {reference}")
 
@@ -628,9 +761,9 @@ def paystack_callback(request):
                 order_data = {
                     'first_name':order_details_session.get('first_name'), 'last_name':order_details_session.get('last_name'),
                     'email':order_details_session.get('email'), 'phone':order_details_session.get('phone'),
-                    'address':address, 'city':city,
-                    'state':state_province, 'zipcode':zipcode,
-                    'country':country,
+                    'address':order_details_session.get('address'), 'city':order_details_session.get('city'), # Use the correct variables from session
+                    'state':order_details_session.get('state'), 'zipcode':order_details_session.get('zipcode'), # Use the correct variables from session
+                    'country':order_details_session.get('country'), # Use the correct variables from session
                     'total_amount':Decimal(str(order_details_session.get('total_amount', '0.0'))).quantize(Decimal('0.01'), ROUND_HALF_UP),
                     'paid':True, 'paystack_reference':reference
                 }
@@ -727,6 +860,9 @@ def paystack_callback(request):
     return redirect('checkout')
 
 def order_success(request, order_reference):
+    """
+    Renders the order success page after a successful payment.
+    """
     try:
         order = Order.objects.get(paystack_reference=order_reference, paid=True)
         # Clear residual session data just in case
@@ -740,10 +876,16 @@ def order_success(request, order_reference):
     return render(request, 'mystore/order_success.html', {'order': order})
 
 def order_failure(request, error_message=None):
+    """
+    Renders the order failure page with an optional error message.
+    """
     context = {'error_message': error_message or "Your payment could not be processed."}
     return render(request, 'mystore/order_failure.html', context)
 
 def competition_page(request):
+    """
+    Renders the competition page, showing remaining prizes and user profile info.
+    """
     prizes_left = WinningCode.objects.filter(is_claimed=False).count()
     launch_event = SiteEvent.objects.filter(event_name='SITE_LAUNCH', is_active=True).order_by('-event_datetime').first()
     launch_datetime_iso = None
@@ -775,6 +917,10 @@ def competition_page(request):
 @login_required
 @require_POST
 def submit_competition_code(request):
+    """
+    Handles submission of competition codes, checks if it's a winning code,
+    and updates prize status.
+    """
     submitted_code = request.POST.get('code', '').strip()
     if not submitted_code or not submitted_code.isdigit() or len(submitted_code) != 6:
         return JsonResponse({'status': 'error', 'message': 'Invalid code format.'})
@@ -825,6 +971,9 @@ def submit_competition_code(request):
         return JsonResponse({'status': 'error', 'message': 'An unexpected error occurred.'})
 
 def signup_view(request):
+    """
+    Handles user registration, including optional referral code processing.
+    """
     if request.user.is_authenticated: return redirect('home')
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -846,13 +995,16 @@ def signup_view(request):
             if not messages.get_messages(request): messages.success(request, "Registration successful!")
             return redirect('home')
         else:
-            # Form is not valid, errors will be in form.errors
-            pass # The template will render form.errors
+            # Form is not valid, errors will be in form.errors and rendered by template
+            pass
     else:
         form = CustomUserCreationForm()
     return render(request, 'mystore/signup.html', {'form': form})
 
 def login_view(request):
+    """
+    Handles user login.
+    """
     if request.user.is_authenticated: return redirect('home')
     next_url_param = request.GET.get('next')
     if request.method == 'POST':
@@ -875,12 +1027,28 @@ def login_view(request):
 
 @login_required
 def logout_view(request):
+    """
+    Logs out the current user.
+    """
     logout(request); messages.info(request, "You have successfully logged out."); return redirect('home')
 
-def privacy_policy_view(request): return render(request, 'mystore/privacy_policy.html')
-def terms_of_service_view(request): return render(request, 'mystore/terms_of_service.html')
+def privacy_policy_view(request):
+    """
+    Renders the privacy policy page.
+    """
+    return render(request, 'mystore/privacy_policy.html')
+
+def terms_of_service_view(request):
+    """
+    Renders the terms of service page.
+    """
+    return render(request, 'mystore/terms_of_service.html')
 
 def sync_products_to_db(products_from_api):
+    """
+    Synchronizes product data fetched from Printify API into the local Django database.
+    Updates existing products or creates new ones.
+    """
     created_count = 0
     updated_count = 0
     if not products_from_api: return 0, 0
@@ -901,7 +1069,7 @@ def sync_products_to_db(products_from_api):
         # Determine blueprint and print provider IDs from Printify product data
         blueprint_id = pd.get('blueprint_id')
         # Print provider ID is usually available at the product level or in variants
-        print_provider_id = pd.get('print_provider_id') 
+        print_provider_id = pd.get('print_provider_id')    
         if not print_provider_id and vars_api: # Fallback to first variant's print_provider_id
             print_provider_id = vars_api[0].get('print_provider_id')
 
@@ -918,7 +1086,7 @@ def sync_products_to_db(products_from_api):
                 "is_enabled":v_api.get("is_enabled",True),
                 'option_value_ids': [str(opt_id) for opt_id in v_api.get('options', [])]
             })
-        
+            
         p_ngn_decimal = (Decimal(p_cents)/Decimal('100.0'))*USD_TO_NGN_RATE
         p_ngn = float(p_ngn_decimal.quantize(Decimal('0.01'), ROUND_HALF_UP))
 
@@ -947,6 +1115,10 @@ def sync_products_to_db(products_from_api):
     return created_count, updated_count
 
 def sync_products_view(request):
+    """
+    View to trigger synchronization of products from Printify to the local database.
+    Fetches all pages of products from Printify.
+    """
     if not PRINTIFY_API_TOKEN:
         messages.error(request, "API token not configured."); return JsonResponse({'status': 'error', 'message': 'API token not configured.'})
     if not PRINTIFY_SHOP_ID:
@@ -962,7 +1134,7 @@ def sync_products_view(request):
             response.raise_for_status()
             data = response.json()
             current_page_products = data.get('data', [])
-            if not current_page_products: break
+            if not current_page_products: break # No more products to fetch
             
             all_products_from_api.extend(current_page_products)
             
