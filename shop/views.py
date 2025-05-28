@@ -351,12 +351,18 @@ def checkout_submit(request):
         cart = get_cart(request)
         if not cart: messages.error(request, "Your cart is empty."); return redirect('view_cart')
         
+        # --- CORRECTED: Define these variables BEFORE they are used in the payload ---
         email = request.POST.get('email') or request.user.email
         name = request.POST.get('name', ''); first_name = name.split(' ')[0] if name else request.user.first_name or 'Customer'
         last_name = ' '.join(name.split(' ')[1:]) if ' ' in name else request.user.last_name or ''
-        phone = request.POST.get('phone', ''); address = request.POST.get('address', ''); city = request.POST.get('city', ''); state_province = request.POST.get('state', '')
-        zipcode = request.POST.get('zipcode', ''); country = request.POST.get('country', 'NG') # Default to NG for Nigeria
-        
+        phone = request.POST.get('phone', '')
+        address = request.POST.get('address', '')
+        city = request.POST.get('city', '')
+        state_province = request.POST.get('state', '')
+        zipcode = request.POST.get('zipcode', '')
+        country = request.POST.get('country', 'NG') # Default to NG for Nigeria
+        # --- END CORRECTION ---
+
         cart_total_price_ngn_decimal = Decimal('0.0'); cart_snapshot_for_session = {}
         
         # Prepare line items for Printify order
