@@ -71,13 +71,4 @@ urlpatterns = [
 
 
 
-
-
-
-
-
-
-
-        path('test-page/', views.test_page_view, name='test_page'),
-
 ]
